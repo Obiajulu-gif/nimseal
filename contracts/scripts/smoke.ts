@@ -83,7 +83,7 @@ async function main() {
   if (net.isMainnet) {
     record(
       "Mainnet settles in USDT",
-      symbol === "USDT" && decimals === 6n,
+      ["USDT", "USDT0"].includes(symbol) && decimals === 6n,
       `${symbol}/${decimals}d`,
     );
   }

@@ -10,7 +10,7 @@ dotenv.config();
 
 // Public RPCs by default; override with your own for reliability. Production is Polygon; Sepolia is
 // the test network Nimiq Pay supports for EVM development.
-const POLYGON_RPC_URL = process.env.POLYGON_RPC_URL ?? "https://polygon-rpc.com";
+const POLYGON_RPC_URL = process.env.POLYGON_RPC_URL ?? "https://polygon-bor-rpc.publicnode.com";
 const SEPOLIA_RPC_URL = process.env.SEPOLIA_RPC_URL ?? "https://rpc.sepolia.org";
 
 // Never fall back to a literal key. An unset key simply means the network has no signer configured

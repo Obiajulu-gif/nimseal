@@ -83,7 +83,7 @@ const [symbol, decimals] = await Promise.all([
   client.readContract({ address: token, abi: ERC20_ABI, functionName: "symbol" }),
   client.readContract({ address: token, abi: ERC20_ABI, functionName: "decimals" }),
 ]);
-check("settlement token", symbol === "USDT" && decimals === 6, `${token} ${symbol}/${decimals}d`);
+check("settlement token", ["USDT", "USDT0"].includes(symbol) && decimals === 6, `${token} ${symbol}/${decimals}d`);
 check("tokenScale matches decimals", (await read("tokenScale")) === 10n ** BigInt(decimals));
 
 console.log("\nEscrow state");

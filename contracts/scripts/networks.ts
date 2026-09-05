@@ -112,10 +112,15 @@ export async function resolveSettlementToken(net: NetworkInfo): Promise<Settleme
 
   if (net.isMainnet) {
     // Applies whether the address came from the default or an override. Supplying an address
-    // explicitly is not a reason to trust it less carefully.
-    if (symbol !== "USDT" || decimalsNumber !== 6) {
+    // explicitly is not a reason to trust it less carefully. Tether migrated the Polygon token's
+    // symbol to "USDT0" (the omnichain USDT standard) while keeping the same address and 6
+    // decimals, so both symbols are accepted; the 6-decimal invariant is what cent accounting
+    // depends on and stays strict.
+    const acceptedSymbols = ["USDT", "USDT0"];
+    if (!acceptedSymbols.includes(symbol) || decimalsNumber !== 6) {
       throw new Error(
-        `Settlement token at ${address} reports ${symbol}/${decimalsNumber}d, expected USDT/6d. ` +
+        `Settlement token at ${address} reports ${symbol}/${decimalsNumber}d, expected ` +
+          `${acceptedSymbols.join(" or ")} at 6 decimals. ` +
           `Refusing to deploy against an unexpected token on Polygon.`,
       );
     }
