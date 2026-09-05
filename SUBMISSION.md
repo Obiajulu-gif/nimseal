@@ -171,7 +171,7 @@ protected USDT settlement, in the wallet users already carry.
 [ ] Nimiq payout wallet supplied by project owner
 [x] Demo script prepared
 [x] Production Polygon deployment (escrow 0xdf4AA5…dEF93) + live HTTPS URL
-[ ] Attestor address set on escrow + ATTESTOR_PRIVATE_KEY in Vercel (owner action)
+[x] Attestor address set on escrow (0x56f2adEA…0645765a) + ATTESTOR_PRIVATE_KEY in Vercel; /api/attestor/info reports chain 137
 ```
 
 ---
