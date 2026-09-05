@@ -1,19 +1,19 @@
 "use client";
 
 /**
- * Wallet connection, network status, and the network guard.
+ * EVM wallet access through Nimiq Pay, network status, and the network guard.
  *
- * The wrong-network banner is persistent and every transaction button in the app is disabled until
- * the wallet is on BOT Chain — a write sent to the wrong chain would either revert or, worse, hit a
+ * Inside Nimiq Pay the EVM wallet is injected at `window.ethereum` and discovered over EIP-6963, so
+ * wagmi's injected connector reaches it with no extension, no WalletConnect, and no MetaMask. The
+ * wrong-network banner is persistent and every settlement button is disabled until the wallet is on
+ * the configured chain — a write sent to the wrong chain would either revert or, worse, hit a
  * different contract at the same address.
  */
 
-import Image from "next/image";
 import Link from "next/link";
-import { FilePlus2, LayoutDashboard } from "lucide-react";
 import { useAccount, useBalance, useConnect, useDisconnect, useSwitchChain } from "wagmi";
 
-import { botchain } from "@/lib/chain";
+import { settlementChain, isTestnet } from "@/lib/chain";
 import { addressUrl, shortenHex } from "@/lib/explorer";
 import {
   formatTokenAmount,
@@ -21,19 +21,16 @@ import {
   useSettlementTokenMetadata,
 } from "@/hooks/use-settlement-token";
 import { Alert, Badge, Button } from "@/components/ui/primitives";
+import { CopyButton } from "@/components/common";
+import { BrandMark } from "@/components/brand";
 
 /**
  * The chain the wallet is *actually* on.
  *
- * Deliberately not `useChainId()`. That hook reads the chain from the wagmi config, and this
- * config declares exactly one chain, so it returns {@link botchain.id} no matter which network
- * the wallet is really connected to. Gating on it produced the worst possible combination: a
- * green "BOT Chain Mainnet" badge, no wrong-network banner, and every write then failing with
- * viem's ChainMismatchError — because viem compares against the connector, not the config.
- *
- * `useAccount().chainId` is the connector's chain, which is what viem checks. It is `undefined`
- * while disconnected, and the wallet's real chain id otherwise, including chains this app does
- * not declare.
+ * Deliberately not `useChainId()`. That hook reads the chain from the wagmi config, which declares
+ * exactly one chain, so it always returns {@link settlementChain.id} regardless of the wallet's
+ * real network. `useAccount().chainId` is the connector's chain — what viem actually checks before
+ * a write — and is `undefined` while disconnected.
  */
 function useWalletChainId(): number | undefined {
   return useAccount().chainId;
@@ -42,10 +39,17 @@ function useWalletChainId(): number | undefined {
 export function useOnCorrectNetwork(): boolean {
   const { isConnected } = useAccount();
   const chainId = useWalletChainId();
-  return isConnected && chainId === botchain.id;
+  return isConnected && chainId === settlementChain.id;
 }
 
-export function ConnectButton() {
+/**
+ * The primary wallet control.
+ *
+ * Copy is written for the Nimiq Pay host rather than a generic dApp: there is no "install a wallet"
+ * dead end, because Nimiq Pay *is* the wallet. The connect action follows an explicit user gesture
+ * and triggers `eth_requestAccounts` through the injected provider.
+ */
+export function ConnectButton({ full = false }: { full?: boolean }) {
   const { address, isConnected } = useAccount();
   const { connect, connectors, isPending } = useConnect();
   const { disconnect } = useDisconnect();
@@ -70,47 +74,35 @@ export function ConnectButton() {
     );
   }
 
-  if (!injectedConnector) {
-    return (
-      <Button size="sm" disabled title="No injected wallet detected">
-        No wallet found
-      </Button>
-    );
-  }
-
   return (
-    <Button size="sm" disabled={isPending} onClick={() => connect({ connector: injectedConnector })}>
-      {isPending ? "Connecting…" : "Connect wallet"}
+    <Button
+      size={full ? "lg" : "sm"}
+      className={full ? "w-full" : undefined}
+      disabled={isPending || !injectedConnector}
+      onClick={() => injectedConnector && connect({ connector: injectedConnector })}
+    >
+      {isPending ? "Connecting…" : "Enable wallet access"}
     </Button>
   );
 }
 
-/**
- * viem's chain name for 677 is plain "BOT Chain", which reads as ambiguous next to a testnet
- * build. Say "Mainnet" outright: whether this is a real deployment is the first thing anyone
- * looking at the app wants to know.
- */
-const NETWORK_LABEL = botchain.testnet ? botchain.name : `${botchain.name} Mainnet`;
+const NETWORK_LABEL = isTestnet ? `${settlementChain.name} · testnet` : settlementChain.name;
 
 export function NetworkBadge() {
   const { isConnected } = useAccount();
   const chainId = useWalletChainId();
 
   if (!isConnected) return <Badge variant="neutral">Not connected</Badge>;
-  if (chainId === botchain.id) return <Badge variant="success">{NETWORK_LABEL}</Badge>;
+  if (chainId === settlementChain.id) return <Badge variant="success">{NETWORK_LABEL}</Badge>;
   return <Badge variant="danger">Wrong network{chainId ? ` · chain ${chainId}` : ""}</Badge>;
 }
 
 /**
  * The connected wallet's settlement-token and gas balances.
  *
- * Both parties need this for different reasons: a buyer needs to know they can cover the invoice
- * before starting an approve/fund sequence, and a seller wants to see the money actually arrive on
- * release. Putting it in the header means whichever role is connected sees their own position
- * without navigating anywhere.
- *
- * The settlement-token balance is the headline because that is what invoices settle in; the native
- * balance is shown second and only matters for gas.
+ * A buyer needs to know they can cover the invoice before an approve/fund sequence; a seller wants
+ * to see the money arrive on release. The settlement-token balance is the headline because that is
+ * what invoices settle in; the native balance is shown second and only matters for gas.
  */
 export function WalletBalances() {
   const { address, isConnected } = useAccount();
@@ -120,12 +112,10 @@ export function WalletBalances() {
   const tokenBalance = useSettlementTokenBalance(address);
   const nativeBalance = useBalance({
     address,
-    chainId: botchain.id,
+    chainId: settlementChain.id,
     query: { enabled: Boolean(address) },
   });
 
-  // Off the expected chain the numbers would be read from a different network, which is worse
-  // than showing nothing: the wrong-network banner is already saying what to fix.
   if (!isConnected || !address || !onCorrectNetwork) return null;
 
   const token =
@@ -160,25 +150,24 @@ export function WrongNetworkBanner() {
   const chainId = useWalletChainId();
   const { switchChain, isPending } = useSwitchChain();
 
-  if (!isConnected || chainId === botchain.id) return null;
+  if (!isConnected || chainId === settlementChain.id) return null;
 
   return (
     <div className="border-b border-destructive/30 bg-destructive/10 backdrop-blur-xl">
-      <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6 lg:px-8">
+      <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6">
         <p className="text-sm text-red-200">
-          Wrong network:{" "}
           {chainId === undefined
-            ? "your wallet has not reported a chain yet"
-            : `your wallet is on chain ${chainId}`}
-          . This app runs on {botchain.name} (chain {botchain.id}). All actions are disabled.
+            ? "Your wallet has not reported a network yet."
+            : `Your Nimiq Pay wallet is on chain ${chainId}.`}{" "}
+          Switch to {settlementChain.name} to continue. All actions are disabled.
         </p>
         <Button
           size="sm"
           variant="destructive"
           disabled={isPending}
-          onClick={() => switchChain({ chainId: botchain.id })}
+          onClick={() => switchChain({ chainId: settlementChain.id })}
         >
-          {isPending ? "Switching…" : `Switch to ${botchain.name}`}
+          {isPending ? "Switching…" : `Switch to ${settlementChain.name}`}
         </Button>
       </div>
     </div>
@@ -186,26 +175,35 @@ export function WrongNetworkBanner() {
 }
 
 /**
- * Wraps page content that requires a connected wallet on BOT Chain, rendering an explanatory
- * placeholder otherwise.
+ * Wraps page content that requires a connected wallet on the settlement chain, rendering an
+ * explanatory placeholder otherwise.
  */
 export function RequireWallet({ children }: { children: React.ReactNode }) {
   const { isConnected } = useAccount();
   const chainId = useWalletChainId();
+  const { switchChain, isPending } = useSwitchChain();
 
   if (!isConnected) {
     return (
-      <Alert tone="info" title="Wallet not connected">
-        <p className="mb-3">Connect an EVM wallet on {botchain.name} to continue.</p>
-        <ConnectButton />
+      <Alert tone="info" title="Wallet access needed">
+        <p className="mb-3">
+          Give BotSeal permission to use your Nimiq Pay wallet on {settlementChain.name} to continue.
+        </p>
+        <ConnectButton full />
       </Alert>
     );
   }
 
-  if (chainId !== botchain.id) {
+  if (chainId !== settlementChain.id) {
     return (
       <Alert tone="warning" title="Wrong network">
-        Switch your wallet to {botchain.name} (chain {botchain.id}) to continue.
+        <p className="mb-3">
+          Switch your Nimiq Pay wallet to {settlementChain.name} (chain {settlementChain.id}) to
+          continue.
+        </p>
+        <Button size="sm" disabled={isPending} onClick={() => switchChain({ chainId: settlementChain.id })}>
+          {isPending ? "Switching…" : `Switch to ${settlementChain.name}`}
+        </Button>
       </Alert>
     );
   }
@@ -213,45 +211,18 @@ export function RequireWallet({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+/**
+ * Compact top bar. Navigation lives in the bottom bar on mobile ({@link BottomNav}); the header
+ * keeps only the brand and the wallet chip so the settlement context is always one glance away.
+ */
 export function SiteHeader() {
   return (
-    <header className="sticky top-0 z-50 border-b border-white/[0.06] bg-background/75 backdrop-blur-2xl">
-      <div className="mx-auto flex h-[4.5rem] max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center gap-7">
-          <Link
-            href="/"
-            aria-label="BotSeal home"
-            className="relative h-9 w-[8.75rem] shrink-0 overflow-hidden rounded-lg border border-white/10 bg-[#fafaf8] shadow-[0_10px_35px_hsl(var(--primary)/0.12)] transition-transform hover:scale-[1.02]"
-          >
-            <Image
-              src="/logo.svg"
-              alt="BotSeal"
-              fill
-              sizes="140px"
-              className="object-contain object-center p-1.5"
-              priority
-            />
-          </Link>
-          <nav
-            aria-label="Primary navigation"
-            className="hidden items-center gap-1 text-sm text-foreground/60 md:flex"
-          >
-            <Link
-              href="/dashboard"
-              className="flex items-center gap-2 rounded-lg px-3 py-2 transition-colors hover:bg-white/[0.05] hover:text-foreground"
-            >
-              <LayoutDashboard className="h-3.5 w-3.5" aria-hidden="true" />
-              Dashboard
-            </Link>
-            <Link
-              href="/invoices/new"
-              className="flex items-center gap-2 rounded-lg px-3 py-2 transition-colors hover:bg-white/[0.05] hover:text-foreground"
-            >
-              <FilePlus2 className="h-3.5 w-3.5" aria-hidden="true" />
-              Create
-            </Link>
-          </nav>
-        </div>
+    <header className="sticky top-0 z-50 border-b border-white/[0.06] bg-background/80 backdrop-blur-2xl">
+      <div className="mx-auto flex h-16 max-w-5xl items-center justify-between gap-3 px-4 sm:px-6">
+        <Link href="/" aria-label="BotSeal home" className="flex items-center gap-2.5">
+          <BrandMark className="h-8 w-8" />
+          <span className="font-display text-base font-semibold tracking-[-0.02em]">BotSeal</span>
+        </Link>
         <div className="flex items-center gap-2 sm:gap-3">
           <WalletBalances />
           <div className="hidden sm:block">
@@ -261,5 +232,19 @@ export function SiteHeader() {
         </div>
       </div>
     </header>
+  );
+}
+
+/** Small helper re-exported for pages that show the connected EVM address with copy. */
+export function ConnectedAddress() {
+  const { address } = useAccount();
+  if (!address) return null;
+  return (
+    <span className="inline-flex items-center gap-1.5">
+      <a href={addressUrl(address)} target="_blank" rel="noopener noreferrer" className="hex">
+        {shortenHex(address)}
+      </a>
+      <CopyButton value={address} label="wallet address" />
+    </span>
   );
 }
