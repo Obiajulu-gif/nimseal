@@ -3,7 +3,6 @@ import { Inter, Space_Grotesk } from "next/font/google";
 
 import { Providers } from "./providers";
 import { SiteHeader, WrongNetworkBanner } from "@/components/wallet";
-import { NimiqGate } from "@/components/nimiq-gate";
 import { BottomNav } from "@/components/nav";
 import "./globals.css";
 
@@ -40,7 +39,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" className={`${bodyFont.variable} ${displayFont.variable}`}>
       <body className="overflow-x-hidden">
         <Providers>
-          <NimiqGate />
           <WrongNetworkBanner />
           <SiteHeader />
           <main className="mx-auto min-h-[calc(100vh-9rem)] max-w-5xl px-4 pb-28 pt-6 sm:px-6 sm:pb-16 sm:pt-10">
