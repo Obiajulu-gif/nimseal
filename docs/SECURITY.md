@@ -22,11 +22,11 @@ the server**, not on mathematics or silicon. A user who does not trust the opera
 from this that a plain database would not give them.
 
 What would close the gap: running the validator inside an attested enclave with reproducible builds
-and publishing the code hash, so a user can verify *which* code holds the key. BOT Chain has no
-confidential-compute primitive to build that on today, which is why this version does not claim it.
+and publishing the code hash, so a user can verify *which* code holds the key. That is future work;
+this version does not claim it.
 
-**Do not describe this as a TEE.** The earlier version of this project ran on a chain that had one,
-in simulation, and was equally explicit that simulation is not attestation.
+**Do not describe this as a TEE.** There is no hardware attestation here — only a server key operated
+by the project.
 
 ---
 
@@ -123,7 +123,7 @@ The deploy script refuses:
 - A mainnet token that does not report `USDT` and 6 decimals.
 - Any token reporting more than 18 or fewer than 2 decimals.
 - A testnet run pointed at the mainnet USDT address — that address holds an unrelated 18-decimal
-  token on chain 968, and deploying against it would mis-scale every invoice by 10¹².
+  token on Sepolia, and deploying against it would mis-scale every invoice by 10¹².
 
 The smoke script re-checks `tokenScale == 10 ** decimals()` against the deployed contract, because
 that particular mismatch is silent and catastrophic.

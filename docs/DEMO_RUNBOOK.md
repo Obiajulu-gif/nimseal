@@ -6,17 +6,18 @@ Deterministic order, exact commands. Total time ~6 minutes once deployed.
 
 ## Before the demo
 
-Two wallet accounts, both on BOT Chain:
+Two wallet accounts, both on the settlement chain (Polygon in production, Sepolia for rehearsal):
 
 | Role | Needs |
 |---|---|
-| **Seller** | BOT for gas |
-| **Buyer** | BOT for gas **and** USDT |
+| **Seller** | native gas (POL / Sepolia ETH) |
+| **Buyer** | native gas **and** USDT |
 
 They must be different addresses — the escrow reverts with `SameSellerAndBuyer` otherwise.
 
-On testnet, BOT comes from <https://faucet.botchain.ai> and USDT from the mock you minted in
-[deployment step 2](DEPLOYMENT.md#2-settlement-token). On mainnet there is no faucet for either.
+On Sepolia, gas comes from a Sepolia faucet and USDT from the mock you minted in
+[deployment step 2](DEPLOYMENT.md#2-settlement-token). On Polygon, fund the wallets with POL and USDT.
+For sealing, both accounts also need a Nimiq wallet in Nimiq Pay (use **Get free NIM** on testnet).
 
 Pre-flight, in order:
 
@@ -25,7 +26,7 @@ node scripts/check-env.mjs
 ```
 
 ```bash
-cd contracts && npm run smoke:botchain
+cd contracts && npm run smoke:sepolia
 ```
 
 ```bash
@@ -46,7 +47,7 @@ cd web && npm run build && npm run start
 
 ## Act 1 — Create a confidential invoice (seller)
 
-1. Open the app, connect the **seller** wallet. The header shows a green **BOT Chain** badge and
+1. Open the app, connect the **seller** wallet. The header shows a green network badge (Polygon / Sepolia) and
    the deployment panel shows the escrow and settlement token addresses.
 
 2. **New invoice**. Fill in:
@@ -78,6 +79,10 @@ cd web && npm run build && npm run start
 
 4. You land on the invoice detail page.
 
+5. **Seal with Nimiq wallet.** In the *Nimiq invoice seal* card, tap **Seal with Nimiq wallet** and
+   confirm in Nimiq Pay. The card flips to **Sealed by NQ…** and a **Share payment link** button
+   appears. That link carries the seal, so the buyer can verify it with no server.
+
 **The point to make:** open the relay transaction on the explorer. The calldata is six fields and a
 signature — parties, a cent total, a due date, and two 32-byte hashes. No description, no reference,
 no quantities, no tax breakdown. Then open the escrow storage and show the same thing: there is
@@ -87,23 +92,25 @@ nowhere for the private terms to be, because there is no field for them.
 
 ## Act 2 — Fund and settle (buyer)
 
-5. Switch to the **buyer** wallet. The dashboard shows the invoice with a **Buyer** badge.
+6. Open the shared payment link as the **buyer**. The **Nimiq verified · Sealed by NQ…** badge is
+   green; expand it to show the address, public key, signature, and commitment. Point out the
+   verification is client-side — the address is derived from the key, not read from the link.
 
-6. Open it and click **Fund this invoice** (or go to `/pay/<id>`). The page shows the required USDT,
-   the buyer's balance, and the current allowance.
+7. Connect the **buyer** wallet. Click **Fund this invoice** (or go to `/pay/<id>`). The page shows
+   the required USDT, the buyer's balance, and the current allowance.
 
    Note what is *not* there: no price, no slippage selector, no "quote expires in" countdown. The
    amount was fixed when the invoice was created and cannot move.
 
-7. **Approve USDT** — it approves the exact amount, not unlimited. Because the amount cannot change,
+8. **Approve USDT** — it approves the exact amount, not unlimited. Because the amount cannot change,
    there is no buffer left over afterwards.
 
-8. **Fund escrow**. The contract recomputes the figure from the invoice's stored cent total and
+9. **Fund escrow**. The contract recomputes the figure from the invoice's stored cent total and
    transfers exactly that. The page supplies no amount at all.
 
-9. **Release payment to seller**. Status → **Released**.
+10. **Release payment to seller**. Status → **Released**.
 
-10. Confirm the seller's USDT balance increased, in the wallet or the explorer.
+11. Confirm the seller's USDT balance increased, in the wallet or the explorer.
 
 ---
 

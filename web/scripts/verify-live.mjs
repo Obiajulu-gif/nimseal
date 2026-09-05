@@ -3,13 +3,14 @@
 
 import { createPublicClient, http, getAddress } from "viem";
 
-// Defaults target the testnet demo. Override to check the mainnet deployment:
-//   VERIFY_CHAIN_ID=677 VERIFY_RPC=https://rpc.botchain.ai npm run verify-live
-const SITE = process.env.VERIFY_SITE ?? "https://botseal.vercel.app";
-const CHAIN_ID = Number(process.env.VERIFY_CHAIN_ID ?? 968);
+// Point this at your deployed site and chain. Defaults target a Sepolia test deployment; override
+// for Polygon production:
+//   VERIFY_SITE=https://your-app.example VERIFY_CHAIN_ID=137 VERIFY_RPC=https://polygon-rpc.com npm run verify-live
+const SITE = process.env.VERIFY_SITE ?? "http://localhost:3000";
+const CHAIN_ID = Number(process.env.VERIFY_CHAIN_ID ?? 11155111);
 const RPC =
   process.env.VERIFY_RPC ??
-  (CHAIN_ID === 677 ? "https://rpc.botchain.ai" : "https://rpc.bohr.life");
+  (CHAIN_ID === 137 ? "https://polygon-rpc.com" : "https://rpc.sepolia.org");
 
 const ESCROW_ABI = [
   { type: "function", name: "attestorAddress", inputs: [], outputs: [{ type: "address" }], stateMutability: "view" },
@@ -32,8 +33,12 @@ const check = (label, ok, detail = "") => {
 };
 
 const chain = {
-  id: CHAIN_ID, name: "BOT Chain Testnet",
-  nativeCurrency: { name: "tBOT", symbol: "tBOT", decimals: 18 },
+  id: CHAIN_ID,
+  name: CHAIN_ID === 137 ? "Polygon" : "Sepolia",
+  nativeCurrency:
+    CHAIN_ID === 137
+      ? { name: "POL", symbol: "POL", decimals: 18 }
+      : { name: "Sepolia Ether", symbol: "ETH", decimals: 18 },
   rpcUrls: { default: { http: [RPC] } },
 };
 const client = createPublicClient({ chain, transport: http(RPC) });

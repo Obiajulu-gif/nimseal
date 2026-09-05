@@ -6,8 +6,8 @@
 |---|---|---|
 | Browser app (`web/`) | User's device | Generating entropy, encrypting, holding plaintext transiently |
 | Attestor (`web/app/api/attestor/`) | The app's own server runtime | Decrypting, validating, computing totals, signing |
-| `BotSealEscrow` (`contracts/`) | BOT Chain | Signature verification, replay protection, custody |
-| USDT | BOT Chain | Settlement asset |
+| `BotSealEscrow` (`contracts/`) | Polygon / Sepolia | Signature verification, replay protection, custody |
+| USDT | Polygon / Sepolia | Settlement asset |
 
 Four boxes, and one of them used to be a Docker Compose stack with a Go toolchain, a Redis instance
 and an HTTPS tunnel. The confidential path is now two route handlers in the same Next.js app that

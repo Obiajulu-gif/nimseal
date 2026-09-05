@@ -3,8 +3,8 @@
 Exact order. Each step's output feeds the next, so running them out of order produces a stack that
 looks configured but is not.
 
-**Rehearse the whole sequence on testnet 968 first.** It costs nothing, and it catches everything
-except gas price. There is no mainnet faucet — a failed mainnet deploy costs real BOT.
+**Rehearse the whole sequence on Sepolia (11155111) first.** It costs only test gas and catches
+everything except production gas price. A failed Polygon deploy costs real POL.
 
 ---
 
@@ -16,6 +16,22 @@ node scripts/check-env.mjs
 
 Node ≥ 20 and npm ≥ 10. No Docker, no Go, no tunnel.
 
+### Values the project owner must supply
+
+None of these can be invented; the code and scripts are complete without them, and each is a real
+secret or a post-deploy fact:
+
+| Value | Where it goes | Notes |
+|---|---|---|
+| `DEPLOYER_PRIVATE_KEY` | `contracts/.env` | funded with POL (Polygon) or Sepolia ETH |
+| `ATTESTOR_PRIVATE_KEY` | host secret store (server-only) | fresh key; whole trust root of the confidential path |
+| Escrow address | `NEXT_PUBLIC_ESCROW_ADDRESS` | output of step 3 |
+| Settlement token | `NEXT_PUBLIC_SETTLEMENT_TOKEN_ADDRESS` | Polygon USDT default; a mock on Sepolia |
+| Live HTTPS URL | Vercel (or any HTTPS host) | the deployed `web/` URL |
+| Nimiq payout wallet | SUBMISSION.md | the competition prize address |
+
+The Nimiq invoice seal needs **no** deployment — it is signed in Nimiq Pay and verified client-side.
+
 ---
 
 ## 1. Contract environment
@@ -26,8 +42,8 @@ cp contracts/.env.example contracts/.env
 
 | Variable | Meaning |
 |---|---|
-| `BOTCHAIN_RPC_URL` | `https://rpc.botchain.ai` |
-| `BOTCHAIN_TESTNET_RPC_URL` | `https://rpc.bohr.life` |
+| `POLYGON_RPC_URL` | `https://polygon-rpc.com` (optional) |
+| `SEPOLIA_RPC_URL` | `https://rpc.sepolia.org` (optional) |
 | `DEPLOYER_PRIVATE_KEY` | A funded key **you** generate and control |
 | `OWNER_ADDRESS` | Escrow owner; defaults to the deployer |
 | `REFUND_GRACE_PERIOD_SECONDS` | Delay before a buyer may reclaim (default 604800) |
@@ -38,26 +54,27 @@ cp contracts/.env.example contracts/.env
 
 Funding the deployer:
 
-- **Testnet** — <https://faucet.botchain.ai>
-- **Mainnet** — no faucet. Acquire BOT via the bridge or B DEX before you start.
+- **Sepolia** — any Sepolia ETH faucet.
+- **Polygon** — fund the deployer with POL for gas before you start.
 
 ---
 
 ## 2. Settlement token
 
-**Mainnet** needs no configuration. The deploy script defaults to USDT and verifies it:
+**Polygon** needs no configuration. The deploy script defaults to USDT and verifies it:
 
 | | |
 |---|---|
-| USDT | `0xaBabc7Ddc03e501d190C676BF3d92ef0e6e87a3C` |
+| USDT | `0xc2132D05D31c914a87C6611C10748AEb04B58e8F` |
 | Reports | `Tether USD` / `USDT` / 6 decimals |
 
-The script **refuses to deploy** against a mainnet token that does not report `USDT` and 6 decimals.
+The script **refuses to deploy** against a Polygon token that does not report `USDT` and 6 decimals.
 
-**Testnet** has no canonical USDT, so deploy a 6-decimal mock and point at it:
+**Sepolia** has no canonical USDT, so deploy a 6-decimal mock and point at it (or use
+`npm run deploy-token:sepolia`):
 
 ```bash
-cd contracts && npx hardhat console --network botchainTestnet
+cd contracts && npx hardhat console --network sepolia
 ```
 
 ```js
@@ -70,9 +87,9 @@ await t.mint("<buyer address>", 1000000n * 10n ** 6n);
 
 Set `SETTLEMENT_TOKEN_ADDRESS` to that address.
 
-> **Do not point testnet at the mainnet USDT address.** On chain 968 that address holds an unrelated
-> 18-decimal token called "Weslie". Deploying against it would mis-scale every invoice by 10¹². The
-> script refuses this specific mistake by name, because it is silent and catastrophic otherwise.
+> **Use a real 6-decimal token on Sepolia.** Invoices are denominated in USD cents, so a settlement
+> token with the wrong decimals mis-scales every amount. The deploy script warns when a testnet
+> token does not report 6 decimals.
 
 ---
 
@@ -104,24 +121,24 @@ The output says which mode it ran in.
 Testnet rehearsal:
 
 ```bash
-cd contracts && npm run deploy:testnet
+cd contracts && npm run deploy:sepolia
 ```
 
 Mainnet:
 
 ```bash
-cd contracts && npm run deploy:botchain
+cd contracts && npm run deploy:polygon
 ```
 
-The script asserts the network is 677 or 968, verifies the settlement token, deploys, waits for
+The script asserts the network is 137 or 11155111, verifies the settlement token, deploys, waits for
 confirmations, then reads every immutable back off the contract and checks it matches what was
-intended. Output goes to `contracts/deployments/botchain-<chainId>.json` — public metadata only,
+intended. Output goes to `contracts/deployments/<network>-<chainId>.json` — public metadata only,
 safe to commit.
 
 Verify independently, no key needed:
 
 ```bash
-cd contracts && npm run smoke:botchain     # or smoke:testnet
+cd contracts && npm run  smoke:polygon    # or smoke:sepolia
 ```
 
 This re-checks that `tokenScale == 10 ** decimals()`, that mainnet settles in USDT/6, that the owner
@@ -138,9 +155,9 @@ cp web/.env.example web/.env.local
 
 | Variable | Source | Exposure |
 |---|---|---|
-| `NEXT_PUBLIC_CHAIN_ID` | `677` or `968` | public |
-| `NEXT_PUBLIC_RPC_URL` | step 1 | public |
-| `NEXT_PUBLIC_EXPLORER_URL` | `https://scan.botchain.ai` | public |
+| `NEXT_PUBLIC_EVM_CHAIN_ID` | `137` or `11155111` | public |
+| `NEXT_PUBLIC_RPC_URL` | optional override | public |
+| `NEXT_PUBLIC_EXPLORER_URL` | optional (defaults to Polygonscan / Sepolia Etherscan) | public |
 | `NEXT_PUBLIC_ESCROW_ADDRESS` | step 3 | public |
 | `NEXT_PUBLIC_SETTLEMENT_TOKEN_ADDRESS` | step 2 | public |
 | `NEXT_PUBLIC_ENABLE_PUBLIC_MODE` | `false` unless demoing the fallback | public |
@@ -165,7 +182,7 @@ rather than shipping the key.
 Start the app so `/api/attestor/info` is reachable, then:
 
 ```bash
-cd contracts && npm run configure-attestor:botchain
+cd contracts && npm run configure-attestor:polygon
 ```
 
 Reads `/info`, cross-checks that the advertised public key derives to the advertised address —
@@ -213,7 +230,7 @@ cd web && npm run build && npm run start
 ## 8. Seed a demo invoice (optional)
 
 ```bash
-cd contracts && BUYER_ADDRESS=0x… npm run seed-demo:botchain
+cd contracts && BUYER_ADDRESS=0x… npm run seed-demo:polygon
 ```
 
 Creates a **public fallback** invoice so a reviewer has real on-chain state to look at. It is marked

@@ -1,249 +1,202 @@
-# BotSeal — BOT Chain Builder Challenge #2
+# BotSeal — Nimiq Mini Apps Competition (Cycle II)
 
-**Track: RWA Applications**
-
-Confidential B2B invoices, escrowed and settled in USDT on BOT Chain.
-
----
-
-## The problem
-
-Trade receivables are one of the largest real-world asset classes there is. Invoice financing,
-factoring and escrowed settlement are ordinary business, done at enormous volume, and almost none of
-it has moved on-chain.
-
-The reason is not tooling. It is that an invoice is commercially sensitive. It contains unit prices,
-the discount you gave this client and not that one, customer identities, tax treatment, payment
-terms. Publishing that to get escrow is a trade most businesses will not make, and asking them to is
-why "tokenized invoices" keeps stalling at the pilot stage.
-
-BotSeal removes the trade. The commercially sensitive half never reaches the chain; the settlement
-half does, and is enforced by a contract.
-
-## What it does
-
-A seller composes an invoice in the browser. Line items, reference, tax and discount detail, and 64
-bytes of hiding entropy are encrypted client-side and sent to an attestor, which decrypts,
-**recomputes every total from the line items**, derives a commitment binding the private terms, and
-signs the settlement facts with EIP-712.
-
-What reaches the chain is only what settlement needs: the two parties, the USD total in cents, the
-due date, and a 32-byte commitment. The buyer approves USDT and funds; the contract enforces
-release, seller refund, and buyer reclaim after a grace period.
-
-The commitment is what makes the private half provable later — the seller reveals the payload and
-anyone can recompute the hash — while remaining impossible to invert, because of the entropy mixed
-into it.
-
-## Why this is RWA, not "an app with a database"
-
-- The asset is a **real trade receivable**, not a synthetic.
-- Settlement is in **real USDT on BOT Chain mainnet**, not a testnet token.
-- The escrow enforces a real **business loop**: issue → fund → release, with refund and expiry
-  paths, and the money moves on-chain.
-- The confidentiality is what makes the asset **issuable at all** by a business that has commercial
-  terms to protect.
+**Project Name:** BotSeal
+**Tagline:** Confidential invoices and protected payments, inside Nimiq Pay.
+**Category:** Payments / Business tools (Nimiq Pay Mini App)
 
 ---
 
-## Migration disclosure
+## Problem
 
-BotSeal is a port. An earlier version of this project ran on Flare, and the Challenge asks migration
-projects three questions.
+Business invoices carry things neither party wants public: line items, unit prices, customer
+identities, tax treatment, per-client discounts. Today's crypto payment flows force a bad trade —
+either everything lands on a public ledger to get escrow, or you settle with a bare wallet transfer
+that carries no structure, no protection, and no proof of who issued it.
 
-### Why BOT Chain?
+## Solution
 
-Two concrete reasons, not positioning.
+BotSeal lets a seller create an invoice whose commercial terms stay encrypted off-chain, seal it
+with their Nimiq wallet so the buyer can verify its origin, and receive USDT held in protected
+escrow. Only the minimum settlement facts — parties, USD total, due date, and a 32-byte commitment —
+ever reach the chain.
 
-**USDT settlement removed an entire subsystem.** The Flare version denominated invoices in USD cents
-but settled in FXRP, a synthetic asset with a floating price. That forced an on-chain oracle read at
-funding time, a staleness window, a slippage ceiling the buyer had to choose, a `payable` non-view
-quote function, and a UI that had to display how old the price was. BOT Chain has real USDT at 6
-decimals. A USD invoice settled in a USD stablecoin needs no oracle, so all of that is gone — and
-with it `StalePrice`, `InvalidPrice`, `SlippageExceeded`, and a class of failure where a legitimate
-payment reverts because a feed moved.
+## Target Users
 
-**The chain is EVM-equivalent enough to port cleanly, and fast enough for the flow.** Cancun opcodes
-are supported — verified directly by executing `MCOPY` and `TSTORE`/`TLOAD` as `eth_call` init code
-on both 677 and 968, rather than assuming — so OpenZeppelin v5 compiles unmodified.
+Freelancers, agencies, contractors, small businesses, and cross-border service providers who invoice
+in USD and want privacy plus payment protection without a bank or a public ledger dump.
 
-### What new capabilities does the BOT Chain version add?
+## Why It Is Useful
 
-| | Flare version | BOT Chain version |
-|---|---|---|
-| Settlement asset | FXRP (synthetic, floating) | **USDT (real, 1:1 with the invoice's own unit)** |
-| Pricing | FTSOv2 oracle read at funding | **None. Amount fixed at issue, exact by construction** |
-| Buyer inputs | Slippage ceiling | **Nothing. The contract computes the amount itself** |
-| Seller transactions | 2 (instruction + relay) | **1 (relay)** |
-| Wait between steps | Indefinite proxy poll | **None** |
-| Confidential path infra | Docker Compose, Go tooling, Redis, HTTPS tunnel | **Two serverless route handlers** |
-| Signature scheme | Hand-rolled domain separator over opaque bytes | **EIP-712, chain- and contract-bound** |
-| Operational surface | ~200 files | **5 files** |
+It replaces "send me crypto to this address" with a real invoice: private terms, a verifiable seal,
+a fixed USD amount, and escrow rules a contract enforces — all in the wallet the user already has.
 
-The seller signs one transaction instead of two, because the attestor is reachable directly rather
-than through an on-chain instruction and a polling proxy. The confidential payload no longer becomes
-a permanent public artifact. And the whole thing deploys as one Next.js app with no container stack.
+## How BotSeal Uses Nimiq Pay
 
-The port is not a redeployment. `git diff` across the migration branch is **+3,792 / −29,740** over
-273 files.
+BotSeal runs inside the Nimiq Pay WebView and uses both injected providers:
 
-### How will you grow users and on-chain activity?
+- **Nimiq provider** (`@nimiq/mini-app-sdk` `init()`): `listAccounts()` for identity and `sign()` for
+  the invoice seal.
+- **Ethereum provider** (`window.ethereum`, EIP-1193, discovered via EIP-6963): `eth_requestAccounts`,
+  `wallet_switchEthereumChain`, ERC-20 `approve`, and the escrow calls (`eth_sendTransaction`,
+  `eth_call`).
 
-Honestly: this is at the stage where the product works and has no users, and we would rather say so
-than project a curve.
+No MetaMask, no WalletConnect, no seed phrase, no signup — Nimiq Pay is the wallet host.
 
-The concrete next steps we can commit to:
+## How BotSeal Uses Nimiq
 
-1. **A revelation flow.** The commitment exists so a seller can prove terms to a third party — a
-   lender, an auditor, a counterparty in a dispute. There is no UI for that yet. It is the single
-   feature that turns this from an escrow into something a financier can underwrite against, and it
-   is next.
-2. **Invoice financing as the actual wedge.** Escrow alone is useful; a receivable a third party can
-   verify and buy is a market. The commitment plus a revealed payload is exactly the artifact a
-   factor needs.
-3. **Distribution through businesses already invoicing in USDT.** Cross-border contractors and
-   agencies settle in stablecoins today and reconcile by hand. That is the population with the
-   problem, and it does not require convincing anyone to adopt crypto first.
-4. **Attested execution.** The confidentiality claim is currently a policy guarantee, not a
-   technical one (see below). Closing that is what makes this credible to a business with real
-   commercial terms to protect.
+The **Nimiq Invoice Seal** is a real trust primitive, not a connection indicator. The seller signs a
+canonical statement binding the invoice's public facts (chain, escrow, invoice id, commitment,
+amount, due date) with their Nimiq key. The buyer's payment link reproduces Nimiq's signed-message
+hash, verifies the Ed25519 signature, and derives the seller's `NQ…` address from the public key —
+entirely client-side, no server. The buyer sees **Nimiq verified · Sealed by NQ…**.
 
----
+## How USDT Works
 
-## Trust model — stated plainly
+Invoices are denominated in integer USD cents and settled in USDT (6 decimals) through the escrow
+contract: buyer approves, funds the exact amount, and releases to the seller; the seller can refund;
+after the due date plus a grace period the buyer can reclaim. No oracle, no slippage — a USD invoice
+settled in a USD asset. Production USDT is Polygon `0xc2132D05D31c914a87C6611C10748AEb04B58e8F`.
 
-The attestor is **a server-side signing key we operate.** It is not a TEE. There is no hardware
-attestation. **An operator with server access can read invoice plaintext during validation.**
+## What Makes It Original
 
-We are stating this prominently rather than burying it, because the alternative is implying a
-guarantee the system does not provide.
+A wallet-backed, self-verifying seal on a *confidential* invoice. Most Mini Apps use the wallet to
+move money; BotSeal also uses it to prove authorship of a document whose contents stay private — and
+the proof travels in the payment link with no backend.
 
-What the design does guarantee, and what is enforced by the contract rather than by us:
+## Privacy Model
 
-- The plaintext never reaches the chain — only a hash of it does.
-- The total is recomputed from the line items before signing. A browser that lies about its own
-  arithmetic gets a rejection, not a signature.
-- A signed result is single-use, and bound by the EIP-712 domain to one chain and one escrow.
-- A compromised attestor key can fabricate invoices nobody is obliged to fund. It **cannot** move
-  escrowed funds — funding, release and refund are gated on the buyer and seller addresses, and
-  there is no owner path to escrowed USDT.
+Browser encrypts (ECIES) → attestor decrypts → recomputes every total → signs only the settlement
+facts (EIP-712) → chain stores the minimum. Line items, identities, tax detail and the
+commitment's entropy never reach the chain. **The attestor is a server key, not a TEE** — BotSeal
+does not claim zero-knowledge or trustless privacy. See [docs/SECURITY.md](docs/SECURITY.md).
 
-[docs/SECURITY.md](docs/SECURITY.md) is the full account, including what would have to change.
+## Architecture
 
----
+See [README.md](README.md#how-it-uses-nimiq-pay) for the full diagram. Next.js 15 Mini App · Nimiq +
+Ethereum providers · off-chain attestor (Next.js route) · `BotSealEscrow` on Polygon/Sepolia.
 
-## Submission checklist
+## Main User Flow
 
-| Requirement | Status |
-|---|---|
-| BOT Chain **Mainnet** deployment | ✅ **live on 677** |
-| Publicly verifiable product with a complete business loop | ✅ issue → fund → release, with refund and expiry paths |
-| Wallet connection and core flow | ✅ injected wallet, chain-pinned writes |
-| Public website / online demo | ✅ **https://botseal.vercel.app** |
-| GitHub repository | ✅ this repo |
-| Demo video | ⛔ pending |
-| Original development | ✅ ported from our own earlier project, disclosed above |
+Seller: open in Nimiq Pay → create invoice → attestor validates → seal with Nimiq wallet → share
+link. Buyer: open link → verify seal → approve USDT → fund escrow → track status.
 
-### Live deployment — BOT Chain Mainnet (677)
+## Technical Stack
 
-| | Address |
-|---|---|
-| `BotSealEscrow` | [`0x358A95Aa014D112CDFbEe5f3eA599BA14B331CBF`](https://scan.botchain.ai/address/0x358A95Aa014D112CDFbEe5f3eA599BA14B331CBF) |
-| Settlement token — real USDT (6d) | [`0xaBabc7Ddc03e501d190C676BF3d92ef0e6e87a3C`](https://scan.botchain.ai/token/0xaBabc7Ddc03e501d190C676BF3d92ef0e6e87a3C) |
-| Attestor signer | [`0x1399edE7cE143bE5D463471Fa5D09CB8996eB818`](https://scan.botchain.ai/address/0x1399edE7cE143bE5D463471Fa5D09CB8996eB818) |
+Next.js 15, React 19, Tailwind, wagmi + viem, `@nimiq/mini-app-sdk`, `@noble/ed25519`/`@noble/hashes`,
+`ecies-geth`, Solidity 0.8.27 + OpenZeppelin 5 + Hardhat.
 
-| Step | Transaction |
-|---|---|
-| Escrow deployment | [`0x0fc68461…8571ff`](https://scan.botchain.ai/tx/0x0fc684611748980d7fda42a84ea313b77fa9164d58126e10b36fd4dbab8571ff) |
-| `setAttestorAddress` | [`0xc22688e9…14e3a2`](https://scan.botchain.ai/tx/0xc22688e94458a32169a1927fd197f9ddcf55d5ade1b71e8d6ce5f40dcd14e3a2) |
-| **Confidential invoice #1** | [`0xe526bebe…78622b`](https://scan.botchain.ai/tx/0xe526bebee18561909acdcf7848d1b5d00c8b15245192924cf387b49fcb78622b) |
+## Repository
 
-Deployed against real USDT, not a mock. The deploy script refuses any mainnet token that does not
-report `USDT` and 6 decimals, and every immutable was read back off-chain and checked after
-deployment.
+`https://github.com/Obiajulu-gif/nimseal` — branch **`nimiq-main`**. MIT licensed.
 
-**The confidential path is proven in production, not just in tests.** `web/scripts/smoke-mainnet.mjs`
-encrypts a real invoice to the deployed site's attestor, which decrypts it, recomputes the total
-from the line items, and signs EIP-712 bound to chain 677 and this escrow — then relays it on
-mainnet. Invoice #1 above was created that way. The relay carried **356 bytes of calldata and no
-invoice plaintext**, asserted against the real mainnet transaction:
+## Live App
 
-```bash
-cd web && node scripts/smoke-mainnet.mjs
+`LIVE_APP_URL_TO_BE_PROVIDED` (deploy `web/` to Vercel over HTTPS; see
+[docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)).
+
+## Testing Instructions
+
+1. `make install`
+2. `cd web && cp .env.example .env.local` (set `NEXT_PUBLIC_EVM_CHAIN_ID=11155111` for Sepolia)
+3. `npm run dev` (binds `0.0.0.0`)
+4. Nimiq Pay → Mini Apps → Custom URL → `http://<LAN-IP>:3000`
+5. `make verify` runs the full offline gate (contracts, lint, types, unit tests, build).
+
+## Team
+
+Solo build by the project owner (GitHub `Obiajulu-gif`).
+
+## Nimiq Prize Wallet
+
+```
+NIMIQ_PRIZE_WALLET_TO_BE_PROVIDED
 ```
 
-Reviewers can confirm the whole deployment agrees with the live site at any time:
+*(Placeholder — the project owner must supply the real Nimiq payout address. Do not treat this as a
+valid address.)*
 
-```bash
-cd web && VERIFY_CHAIN_ID=677 npm run verify-live
+## Known Limitations
+
+- Attestor trust is a server key, not a TEE; not zero-knowledge.
+- The confidential ECIES path is most reliable over HTTPS (Web Crypto).
+- Contract is unaudited, experimental software.
+
+---
+
+## Competition Description (≤250 words)
+
+BotSeal is a Nimiq Pay Mini App for confidential invoicing and protected settlement. It's built for
+freelancers, agencies, contractors and small businesses who invoice in USD and don't want their line
+items, prices and client relationships written to a public ledger just to get payment protection.
+
+A seller opens BotSeal inside Nimiq Pay and composes an invoice. The commercial detail is encrypted
+in the browser; an off-chain attestor decrypts it, recomputes every total, and signs only the
+settlement facts. The seller then seals the invoice with their Nimiq wallet — signing a canonical
+statement that binds the invoice to their Nimiq identity. That seal is the heart of the integration:
+the buyer's payment link verifies the Ed25519 signature and derives the seller's NQ address
+client-side, showing "Nimiq verified · Sealed by NQ…" with no server involved. The wallet doesn't
+just move money here; it proves who issued a document whose contents stay private.
+
+Settlement uses the Ethereum provider Nimiq Pay injects: the buyer approves and funds USDT into an
+escrow contract that enforces release, refund and expiry. Only parties, USD total, due date and a
+32-byte commitment ever touch the chain.
+
+The whole flow is mobile-first and needs no extension, seed phrase or signup — Nimiq Pay is the
+wallet. BotSeal is honest about its trust model: the attestor is a server key, not a TEE, and never
+claims zero-knowledge. What it delivers is private invoicing, wallet-backed proof of origin, and
+protected USDT settlement, in the wallet users already carry.
+
+---
+
+## Compliance Checklist
+
+```
+[x] Public GitHub repository
+[x] MIT License (root LICENSE + package.json)
+[x] Built as a Nimiq Pay Mini App
+[x] Uses Nimiq Pay wallet infrastructure (Nimiq + Ethereum providers)
+[x] Supports USDT settlement (and Nimiq-native signing)
+[x] Meaningful Nimiq integration (wallet-backed invoice seal, verified client-side)
+[x] No hardcoded private keys
+[x] No exposed secrets (.env.example placeholders only)
+[x] Functional product (builds, runs, 166 automated tests pass)
+[x] Mobile responsive (375px verified, no horizontal overflow)
+[x] Local testing path inside Nimiq Pay documented
+[x] Competition description <= 250 words
+[x] Team information prepared
+[ ] Nimiq payout wallet supplied by project owner
+[x] Demo script prepared
+[ ] Production Polygon deployment + live HTTPS URL (owner action)
 ```
 
-18 assertions covering site reachability, chain agreement, attestor identity, token metadata,
-escrow state and error hygiene.
-
-### Rehearsal deployment — BOT Chain Testnet (968)
-
-The mainnet deployment above was rehearsed end to end on testnet first, including a complete
-settled invoice. That deployment is still live and reviewable.
-
-| | Address |
-|---|---|
-| `BotSealEscrow` | [`0x926A0215BC58c4897c5604a7E5eeCf5D4d84cc1D`](https://scan.bohr.life/address/0x926A0215BC58c4897c5604a7E5eeCf5D4d84cc1D) |
-| USDT (test settlement token, 6d) | [`0x358A95Aa014D112CDFbEe5f3eA599BA14B331CBF`](https://scan.bohr.life/address/0x358A95Aa014D112CDFbEe5f3eA599BA14B331CBF) |
-| Attestor signer | [`0x1399edE7cE143bE5D463471Fa5D09CB8996eB818`](https://scan.bohr.life/address/0x1399edE7cE143bE5D463471Fa5D09CB8996eB818) |
-
-A complete confidential invoice was issued, funded and settled against this deployment:
-
-| Step | Transaction |
-|---|---|
-| Confidential relay | [`0xaa609e39…a6cfaa`](https://scan.bohr.life/tx/0xaa609e39b4f4565aa2e0468535ce022f5d619af461c90632762ecf5a20a6cfaa) |
-| Funded ($2,510.22) | [`0x5fab4d98…ae0063`](https://scan.bohr.life/tx/0x5fab4d9826eb2a34f80db31cb63520fd8d79ba6a1aef1b63faf113296bae0063) |
-| Released to seller | [`0xedf7ecd2…e225e9`](https://scan.bohr.life/tx/0xedf7ecd22885b4e2d3641179ed4ad22c10d75d7985b981ab97acbda46de225e9) |
-
-The relay transaction carried 356 bytes of calldata and no invoice plaintext. Reproduce the whole
-sequence with `npm run smoke-live:testnet`.
-
-The test settlement token has an open `mint()`, so a reviewer who wants to exercise the full flow
-without spending real USDT can fund their own wallet on 968 and run it there.
-
-> Note for reviewers: the mainnet escrow and the testnet settlement token happen to share the
-> address string `0x358A95Aa…31CBF`. They are unrelated contracts on different chains — an artefact
-> of `CREATE` deriving the address from deployer plus nonce, and the same deployer having sent its
-> first transaction on each chain.
-
 ---
 
-## Engineering notes
+## Demo Script (90–120s)
 
-**Verification.** `make verify` runs everything offline with no chain, wallet or key: 66 contract
-tests, 88 frontend tests, lint, typecheck and a production build.
+```
+0:00–0:10  Problem
+  "Business invoices carry private terms. Most crypto payment flows expose everything,
+   or give you no protection at all."
 
-Coverage on `BotSealEscrow.sol`: **100% statements, 100% functions, 100% lines, 85.3% branches.**
+0:10–0:25  Open BotSeal inside Nimiq Pay
+  Home screen: "Private invoices. Protected payments." Tap Create invoice.
 
-**The confidential path was verified live, not just unit-tested.** `web/scripts/check-attestor.mjs`
-encrypts a real invoice against a running service and asserts the total was recomputed rather than
-trusted, the signature recovers to the advertised address, the attestation id is deterministic
-across two submissions, an invalid invoice is refused with 422 naming the rule and never the value,
-and a garbage ciphertext fails uniformly so the endpoint cannot be used as a decryption oracle.
+0:25–0:50  Seller creates a confidential invoice
+  Enter buyer, amount, due date, line items. Show the live total.
+  Attestor validates and signs. Show "Attestor online".
 
-**The EIP-712 seam is pinned from both sides.** The web test asserts the exact type string plus a
-golden digest generated independently with ethers; the contract test asserts its own
-`hashConfidentialInvoice` against the same encoding. A drift there would make every signature
-unrelayable and would otherwise only surface at relay time.
+0:50–1:05  Seal with Nimiq
+  Tap "Seal with Nimiq wallet" → confirm in Nimiq Pay.
+  Card flips to "Sealed by NQ…". Tap Share payment link.
 
-**Deployment refuses known-bad configurations.** The script will not deploy against a mainnet token
-that does not report `USDT`/6 decimals, and refuses a testnet run pointed at the mainnet USDT
-address — on chain 968 that address holds an unrelated 18-decimal token, and using it would
-mis-scale every invoice by 10¹².
+1:05–1:30  Buyer opens the link
+  Show the green "Nimiq verified · Sealed by NQ…" badge; expand the technical details.
+  Show amount, seller, due date. Approve USDT, then Fund escrow.
 
-**No floating point touches a monetary value** in the browser, the attestor, or the contract.
-`Number("0.07") * 100` is `7.000000000000001`; there is a test asserting `parseUsdToCents("0.07")`
-returns exactly `7n`.
+1:30–1:45  Funded
+  Status → Funded. Show escrow protection and the transaction on the explorer.
 
----
-
-## Documentation
-
-[Architecture](docs/ARCHITECTURE.md) · [Confidential flow](docs/CONFIDENTIAL_FLOW.md) ·
-[Security](docs/SECURITY.md) · [Deployment](docs/DEPLOYMENT.md) · [Demo runbook](docs/DEMO_RUNBOOK.md) ·
-[Migration plan](MIGRATION_PLAN.md)
+1:45–2:00  Dashboard
+  Both invoices listed with status. Close: "Private terms. Protected settlement.
+  All inside Nimiq Pay."
+```

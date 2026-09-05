@@ -3,15 +3,15 @@
         sync-abi web-dev web-build web-test web-lint web-typecheck verify clean
 
 help:
-	@echo "BotSeal"
+	@echo "BotSeal — confidential invoices for Nimiq Pay"
 	@echo ""
 	@echo "  make install                      Install contract and web dependencies"
 	@echo "  make check-env                    Report which environment variables are set"
 	@echo ""
 	@echo "  make contracts-test               Run the Hardhat test suite"
 	@echo "  make contracts-coverage           Solidity coverage report"
-	@echo "  make contracts-deploy-testnet     Deploy BotSealEscrow to BOT Chain testnet (968)"
-	@echo "  make contracts-deploy             Deploy BotSealEscrow to BOT Chain mainnet (677)"
+	@echo "  make contracts-deploy-testnet     Deploy BotSealEscrow to Sepolia (11155111)"
+	@echo "  make contracts-deploy             Deploy BotSealEscrow to Polygon (137)"
 	@echo "  make contracts-configure-attestor Set the attestor signing address on the escrow"
 	@echo "  make contracts-smoke              Read-only checks against the deployed escrow"
 	@echo ""
@@ -39,16 +39,16 @@ contracts-coverage:
 	cd contracts && npm run coverage
 
 contracts-deploy-testnet:
-	cd contracts && npm run deploy:testnet
+	cd contracts && npm run deploy:sepolia
 
 contracts-deploy:
-	cd contracts && npm run deploy:botchain
+	cd contracts && npm run deploy:polygon
 
 contracts-configure-attestor:
-	cd contracts && npm run configure-attestor:botchain
+	cd contracts && npm run configure-attestor:polygon
 
 contracts-smoke:
-	cd contracts && npm run smoke:botchain
+	cd contracts && npm run smoke:polygon
 
 # --- ABI ---------------------------------------------------------------------
 
