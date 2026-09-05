@@ -1,79 +1,81 @@
 /**
- * BOT Chain definitions and the shared public client.
+ * EVM settlement-chain definition and the shared public client.
  *
- * viem ships no BOT Chain definition, so both networks are declared explicitly from the official
- * network constants (dev-docs.botchain.ai/docs/Developers/json-rpc-endpoint). The configured RPC
- * and explorer always win, so a self-hosted or third-party endpoint works without a code change.
+ * BotSeal settles in USDT through the EVM provider that Nimiq Pay injects at `window.ethereum`
+ * (EIP-1193, discoverable via EIP-6963). Those chains are standard public networks, so their
+ * definitions come from viem rather than being hand-declared:
+ *
+ *   - Polygon (137)   — production settlement in real USDT.
+ *   - Sepolia (11155111) — development and testing against a 6-decimal mock ERC-20.
+ *
+ * The active chain is selected by `NEXT_PUBLIC_EVM_CHAIN_ID`. A configured RPC or explorer always
+ * wins over viem's defaults, so a private RPC works without a code change.
  */
 
-import { createPublicClient, defineChain, http, type Chain } from "viem";
+import { createPublicClient, http, type Chain } from "viem";
+import { polygon, sepolia } from "viem/chains";
 
 import { env } from "./env";
 
-export const BOTCHAIN_MAINNET_ID = 677;
-export const BOTCHAIN_TESTNET_ID = 968;
+export const POLYGON_CHAIN_ID = 137;
+export const SEPOLIA_CHAIN_ID = 11155111;
 
-export const botchainMainnet = defineChain({
-  id: BOTCHAIN_MAINNET_ID,
-  name: "BOT Chain",
-  nativeCurrency: { name: "BOT", symbol: "BOT", decimals: 18 },
-  rpcUrls: {
-    default: { http: ["https://rpc.botchain.ai"], webSocket: ["wss://ws-rpc.botchain.ai"] },
-  },
-  blockExplorers: {
-    default: { name: "BOTScan", url: "https://scan.botchain.ai" },
-  },
-});
-
-export const botchainTestnet = defineChain({
-  id: BOTCHAIN_TESTNET_ID,
-  name: "BOT Chain Testnet",
-  nativeCurrency: { name: "BOT", symbol: "tBOT", decimals: 18 },
-  rpcUrls: {
-    default: { http: ["https://rpc.bohr.life"] },
-  },
-  blockExplorers: {
-    default: { name: "BOTScan Testnet", url: "https://scan.bohr.life" },
-  },
-  testnet: true,
-});
+/** The EVM chains Nimiq Pay exposes that BotSeal supports for settlement. */
+const SUPPORTED_CHAINS: Record<number, Chain> = {
+  [POLYGON_CHAIN_ID]: polygon,
+  [SEPOLIA_CHAIN_ID]: sepolia,
+};
 
 /**
- * The chain the app is configured for.
+ * The EVM chain this build settles on.
  *
- * Selected by `NEXT_PUBLIC_CHAIN_ID` so a testnet rehearsal build and the mainnet build differ
- * only by environment. An unrecognised id is a configuration error rather than something to guess
- * at — silently defaulting to mainnet is how funds end up on the wrong network.
+ * Selected by `NEXT_PUBLIC_EVM_CHAIN_ID` so a Sepolia test build and the Polygon production build
+ * differ only by environment. An unrecognised id is a configuration error rather than something to
+ * guess at — silently defaulting is how funds end up on the wrong network.
  */
 function resolveChain(): Chain {
-  const base =
-    env.chainId === BOTCHAIN_TESTNET_ID
-      ? botchainTestnet
-      : env.chainId === BOTCHAIN_MAINNET_ID
-        ? botchainMainnet
-        : undefined;
+  const base = SUPPORTED_CHAINS[env.chainId];
 
   if (base === undefined) {
     throw new Error(
-      `NEXT_PUBLIC_CHAIN_ID=${env.chainId} is not a BOT Chain network. ` +
-        `Use ${BOTCHAIN_MAINNET_ID} (mainnet) or ${BOTCHAIN_TESTNET_ID} (testnet).`,
+      `NEXT_PUBLIC_EVM_CHAIN_ID=${env.chainId} is not a supported Nimiq Pay EVM network. ` +
+        `Use ${POLYGON_CHAIN_ID} (Polygon, production) or ${SEPOLIA_CHAIN_ID} (Sepolia, testing).`,
     );
   }
 
-  // Always honour the configured RPC and explorer.
+  // Honour a configured RPC and explorer; otherwise keep viem's public defaults.
   return {
     ...base,
-    rpcUrls: { default: { http: [env.rpcUrl] } },
-    blockExplorers: {
-      default: { name: base.blockExplorers.default.name, url: env.explorerUrl },
-    },
+    rpcUrls: env.rpcUrl
+      ? { default: { http: [env.rpcUrl] } }
+      : base.rpcUrls,
+    blockExplorers: env.explorerUrl
+      ? { default: { name: base.blockExplorers?.default.name ?? "Explorer", url: env.explorerUrl } }
+      : base.blockExplorers,
   } as Chain;
 }
 
-export const botchain: Chain = resolveChain();
+/** The EVM settlement chain. Exported under a neutral name; it is Polygon or Sepolia at runtime. */
+export const settlementChain: Chain = resolveChain();
+
+/** The hex chain id (`0x89`, `0xaa36a7`) for `wallet_switchEthereumChain`. */
+export const settlementChainIdHex = `0x${settlementChain.id.toString(16)}` as const;
+
+/** Whether this build settles on a testnet. */
+export const isTestnet = settlementChain.id === SEPOLIA_CHAIN_ID;
+
+/** The best RPC URL: configured override, else the chain's first default. */
+export function rpcUrl(): string {
+  return env.rpcUrl ?? settlementChain.rpcUrls.default.http[0]!;
+}
+
+/** The block-explorer base URL for the active chain. */
+export function explorerBaseUrl(): string {
+  return (env.explorerUrl ?? settlementChain.blockExplorers?.default.url ?? "").replace(/\/+$/, "");
+}
 
 /** Read-only client for server components and non-wallet reads. */
 export const publicClient = createPublicClient({
-  chain: botchain,
-  transport: http(env.rpcUrl),
+  chain: settlementChain,
+  transport: http(rpcUrl()),
 });

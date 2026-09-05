@@ -25,7 +25,7 @@ import { waitForTransactionReceipt, writeContract } from "wagmi/actions";
 
 import { escrowAbi } from "@/lib/contracts";
 import { explainError } from "@/lib/errors";
-import { botchain } from "@/lib/chain";
+import { settlementChain } from "@/lib/chain";
 import {
   deserialiseAttestation,
   encryptToAttestor,
@@ -132,11 +132,11 @@ export function useConfidentialInvoice() {
           );
         }
 
-        if (info.chainId !== botchain.id) {
+        if (info.chainId !== settlementChain.id) {
           return fail(
             "wrong-network",
             `The attestor is configured for chain ${info.chainId}, but this app is on ` +
-              `chain ${botchain.id}. A signature minted for another chain cannot be relayed here.`,
+              `chain ${settlementChain.id}. A signature minted for another chain cannot be relayed here.`,
           );
         }
         if (info.escrowContract.toLowerCase() !== payload.escrowContract.toLowerCase()) {
@@ -198,7 +198,7 @@ export function useConfidentialInvoice() {
         try {
           const hash = await writeContract(config, {
             // Pinned so a relay can never be paid for on the wrong chain.
-            chainId: botchain.id,
+            chainId: settlementChain.id,
             abi: escrowAbi,
             address: payload.escrowContract,
             functionName: "relayConfidentialInvoice",

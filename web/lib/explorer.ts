@@ -1,26 +1,22 @@
 /**
- * BOT Chain explorer URL construction.
+ * Block-explorer URL construction for the active EVM settlement chain.
  *
- * The base URL comes from the environment so a self-hosted or mirrored explorer works without a
- * code change. Trailing slashes are normalised so `.../tx//0x…` can never be produced.
+ * The base URL comes from the chain definition (Polygonscan, Sepolia Etherscan) or a configured
+ * override. Trailing slashes are normalised so `.../tx//0x…` can never be produced.
  */
 
-import { env } from "./env";
-
-function base(): string {
-  return env.explorerUrl.replace(/\/+$/, "");
-}
+import { explorerBaseUrl } from "./chain";
 
 export function txUrl(hash: string): string {
-  return `${base()}/tx/${hash}`;
+  return `${explorerBaseUrl()}/tx/${hash}`;
 }
 
 export function addressUrl(address: string): string {
-  return `${base()}/address/${address}`;
+  return `${explorerBaseUrl()}/address/${address}`;
 }
 
 export function blockUrl(block: bigint | number): string {
-  return `${base()}/block/${block.toString()}`;
+  return `${explorerBaseUrl()}/block/${block.toString()}`;
 }
 
 /** Shortens a hash or address for display: `0x1234…cdef`. */

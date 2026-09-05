@@ -12,6 +12,9 @@
 
 import { z } from "zod";
 
+const POLYGON_CHAIN_ID = 137;
+const SEPOLIA_CHAIN_ID = 11155111;
+
 const addressSchema = z
   .string()
   .regex(/^0x[0-9a-fA-F]{40}$/, "must be a 0x-prefixed 20-byte address");
@@ -23,6 +26,13 @@ const optionalAddress = z
   .transform((value) => (value.length === 0 ? undefined : value))
   .pipe(addressSchema.optional());
 
+/** An optional URL; blank normalises to `undefined` so the chain default is used. */
+const optionalUrl = z
+  .string()
+  .trim()
+  .transform((value) => (value.length === 0 ? undefined : value))
+  .pipe(z.string().url().optional());
+
 const booleanish = z
   .string()
   .trim()
@@ -32,10 +42,18 @@ const publicSchema = z.object({
   chainId: z
     .string()
     .trim()
-    .transform((value) => (value.length === 0 ? 677 : Number(value)))
-    .pipe(z.number().int().positive()),
-  rpcUrl: z.string().url(),
-  explorerUrl: z.string().url(),
+    .transform((value) => (value.length === 0 ? POLYGON_CHAIN_ID : Number(value)))
+    .pipe(
+      z
+        .number()
+        .int()
+        .refine(
+          (id) => id === POLYGON_CHAIN_ID || id === SEPOLIA_CHAIN_ID,
+          `must be ${POLYGON_CHAIN_ID} (Polygon) or ${SEPOLIA_CHAIN_ID} (Sepolia)`,
+        ),
+    ),
+  rpcUrl: optionalUrl,
+  explorerUrl: optionalUrl,
   escrowAddress: optionalAddress,
   settlementTokenAddress: optionalAddress,
   enablePublicMode: booleanish,
@@ -43,14 +61,12 @@ const publicSchema = z.object({
 
 export type PublicEnv = z.infer<typeof publicSchema>;
 
-const DEFAULT_RPC_URL = "https://rpc.botchain.ai";
-const DEFAULT_EXPLORER_URL = "https://scan.botchain.ai";
-
 function readPublicEnv(): PublicEnv {
   const parsed = publicSchema.safeParse({
-    chainId: process.env.NEXT_PUBLIC_CHAIN_ID ?? "",
-    rpcUrl: process.env.NEXT_PUBLIC_RPC_URL || DEFAULT_RPC_URL,
-    explorerUrl: process.env.NEXT_PUBLIC_EXPLORER_URL || DEFAULT_EXPLORER_URL,
+    // Accept the legacy NEXT_PUBLIC_CHAIN_ID name as a fallback so older env files keep working.
+    chainId: process.env.NEXT_PUBLIC_EVM_CHAIN_ID ?? process.env.NEXT_PUBLIC_CHAIN_ID ?? "",
+    rpcUrl: process.env.NEXT_PUBLIC_RPC_URL ?? "",
+    explorerUrl: process.env.NEXT_PUBLIC_EXPLORER_URL ?? "",
     escrowAddress: process.env.NEXT_PUBLIC_ESCROW_ADDRESS ?? "",
     settlementTokenAddress: process.env.NEXT_PUBLIC_SETTLEMENT_TOKEN_ADDRESS ?? "",
     enablePublicMode: process.env.NEXT_PUBLIC_ENABLE_PUBLIC_MODE ?? "false",

@@ -5,7 +5,7 @@
  * amount, and the attestor's rejection strings name a field and a rule, never a value.
  */
 
-import { botchain } from "./chain";
+import { settlementChain } from "./chain";
 
 /** Custom error name -> user-facing explanation. Keys match `BotSealEscrow`'s error selectors. */
 const ESCROW_ERRORS: Record<string, string> = {
@@ -20,21 +20,16 @@ const ESCROW_ERRORS: Record<string, string> = {
   NotBuyer: "Only the buyer can do that.",
   InvoiceExpired: "This invoice is past its due date and can no longer be funded.",
   RefundNotAvailable: "The refund grace period has not elapsed yet.",
-  SlippageExceeded:
-    "The price moved beyond your slippage tolerance. Refresh the quote and try again.",
   AttestorNotConfigured: "The escrow has no attestor signing address configured yet.",
   InvalidAttestorSignature:
     "The attestor signature on this result is not valid for this escrow and chain.",
   AttestationAlreadyConsumed:
     "This confidential result has already been used to create an invoice.",
-  ResultForWrongContract: "This result was produced for a different escrow contract.",
   InvalidResultSeller: "Only the seller named in the confidential result can relay it.",
   InvalidAttestationId: "The attestation id is missing.",
   SameSellerAndBuyer: "The buyer must be different from the seller.",
   CannotRecoverEscrowToken: "Escrowed funds cannot be moved by the owner.",
   UnsupportedTokenDecimals: "The token reports an unsupported number of decimals.",
-  InvalidMaxPriceAge: "The configured maximum price age is out of range.",
-  EmptyEncryptedPayload: "The encrypted payload was empty.",
   EnforcedPause: "The contract is paused.",
   OwnableUnauthorizedAccount: "Only the contract owner can do that.",
 };
@@ -49,16 +44,16 @@ const TOKEN_HINTS: Array<[RegExp, string]> = [
   [/transfer amount exceeds balance/i, "Your token balance is too low."],
 ];
 
-// Name the network this build is actually pinned to, with its chain id. "Switch to BOT Chain" is
-// worse than useless on a testnet build: the user follows it to mainnet, which is a different
-// chain with a different escrow, and the relay fails again for a new reason.
-const TARGET = `${botchain.name} (chain ${botchain.id})`;
+// Name the network this build is actually pinned to, with its chain id. "Switch networks" is worse
+// than useless on a testnet build: the user follows it to production, which is a different chain
+// with a different escrow, and the transaction fails again for a new reason.
+const TARGET = `${settlementChain.name} (chain ${settlementChain.id})`;
 
 const WALLET_HINTS: Array<[RegExp, string]> = [
-  [/user rejected|user denied|ACTION_REJECTED|4001/i, "You rejected the request in your wallet."],
+  [/user rejected|user denied|ACTION_REJECTED|4001/i, "You cancelled the request in Nimiq Pay. No transaction was sent."],
   [
     /insufficient funds for gas|insufficient funds for intrinsic/i,
-    `Not enough ${botchain.nativeCurrency.symbol} to pay for gas.`,
+    `Not enough ${settlementChain.nativeCurrency.symbol} in your Nimiq Pay wallet to pay for gas.`,
   ],
   [
     /chain mismatch|chain not configured|ChainMismatchError|does not match the target chain/i,
@@ -70,7 +65,7 @@ const WALLET_HINTS: Array<[RegExp, string]> = [
   [
     /gas required exceeds allowance|exceeds allowance \(0\)|cannot estimate gas/i,
     `The transaction could not be estimated. Check your wallet is on ${TARGET} and holds ` +
-      `${botchain.nativeCurrency.symbol} for gas.`,
+      `${settlementChain.nativeCurrency.symbol} for gas.`,
   ],
   [/nonce too low|replacement transaction underpriced/i, "A pending transaction is in the way."],
   [/timeout|timed out/i, "The network did not respond in time. Try again."],

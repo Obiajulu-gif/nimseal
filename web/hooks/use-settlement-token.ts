@@ -19,7 +19,7 @@ import { erc20Abi, escrowAbi, escrowAddress, settlementTokenAddress } from "@/li
 import { env } from "@/lib/env";
 import { explainError } from "@/lib/errors";
 import { txUrl } from "@/lib/explorer";
-import { botchain } from "@/lib/chain";
+import { settlementChain } from "@/lib/chain";
 
 const token = () => env.settlementTokenAddress as Hex | undefined;
 
@@ -81,7 +81,7 @@ export function useInvoiceQuote(invoiceId?: bigint, enabled = true) {
     address: env.escrowAddress as Hex | undefined,
     functionName: "quoteInvoice",
     args: invoiceId !== undefined ? [invoiceId] : undefined,
-    chainId: botchain.id,
+    chainId: settlementChain.id,
     query: {
       enabled: enabled && invoiceId !== undefined && Boolean(env.escrowAddress),
       staleTime: Infinity,
@@ -105,7 +105,7 @@ export function useApproveSettlementToken() {
       const hash = await writeContract(config, {
         // See the note in use-invoices.ts: pinning the chain turns a wrong-network send into a
         // clear pre-flight error instead of a failed transaction on another chain.
-        chainId: botchain.id,
+        chainId: settlementChain.id,
         abi: erc20Abi,
         address: settlementTokenAddress(),
         functionName: "approve",
@@ -120,7 +120,7 @@ export function useApproveSettlementToken() {
     },
     onSuccess: (receipt) => {
       toast.success("Settlement token approved.", {
-        description: `View on ${botchain.name} explorer`,
+        description: `View on ${settlementChain.name} explorer`,
         action: {
           label: "Open",
           onClick: () => window.open(txUrl(receipt.transactionHash), "_blank", "noopener"),

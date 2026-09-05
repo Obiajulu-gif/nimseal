@@ -19,7 +19,7 @@ import { escrowAbi, escrowAddress, type Invoice } from "@/lib/contracts";
 import { explainError } from "@/lib/errors";
 import { env } from "@/lib/env";
 import { txUrl } from "@/lib/explorer";
-import { botchain } from "@/lib/chain";
+import { settlementChain } from "@/lib/chain";
 
 /** Ids where the connected address is the seller. */
 export function useSellerInvoiceIds(address?: Hex) {
@@ -147,7 +147,7 @@ export function useEscrowWrite() {
         // ChainMismatchError before broadcasting instead of submitting to whatever chain the
         // wallet happens to be on. Without this, a wallet left on Ethereum mainnet sends there
         // and the user gets a raw "gas required exceeds allowance (0)" from the mainnet RPC.
-        chainId: botchain.id,
+        chainId: settlementChain.id,
         abi: escrowAbi,
         address: escrowAddress(),
         functionName,
@@ -163,7 +163,7 @@ export function useEscrowWrite() {
     },
     onSuccess: (receipt, variables) => {
       toast.success(variables.successMessage, {
-        description: `View on ${botchain.name} explorer`,
+        description: `View on ${settlementChain.name} explorer`,
         action: {
           label: "Open",
           onClick: () => window.open(txUrl(receipt.transactionHash), "_blank", "noopener"),

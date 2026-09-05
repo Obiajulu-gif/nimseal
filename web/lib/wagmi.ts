@@ -1,9 +1,10 @@
 /**
- * Wagmi configuration.
+ * Wagmi configuration for the Nimiq Pay EVM provider.
  *
- * The injected connector is used rather than WalletConnect: WalletConnect requires a project id
- * from an external account, and a build that cannot be run without one would be a worse default
- * for a public demo. MetaMask and any other injected BOT Chain wallet work out of the box.
+ * Inside Nimiq Pay the wallet is injected at `window.ethereum` and announced over EIP-6963, which
+ * wagmi discovers automatically — no WalletConnect project id, no browser extension, no MetaMask.
+ * The `injected()` connector is kept as a fallback so the same build also works in a desktop
+ * browser that has an injected EVM wallet, which is only used for local development.
  */
 
 import { createConfig, http } from "wagmi";
@@ -12,14 +13,14 @@ import { createConfig, http } from "wagmi";
 // and break the production build.
 import { injected } from "@wagmi/core";
 
-import { botchain } from "./chain";
-import { env } from "./env";
+import { settlementChain, rpcUrl } from "./chain";
 
 export const wagmiConfig = createConfig({
-  chains: [botchain],
-  connectors: [injected()],
+  chains: [settlementChain],
+  connectors: [injected({ shimDisconnect: true })],
+  // EIP-6963 discovery is on by default, so Nimiq Pay's provider is picked up without announcing it.
   transports: {
-    [botchain.id]: http(env.rpcUrl),
+    [settlementChain.id]: http(rpcUrl()),
   },
   ssr: true,
 });
