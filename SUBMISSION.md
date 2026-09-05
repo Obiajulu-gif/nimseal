@@ -95,16 +95,20 @@ Next.js 15, React 19, Tailwind, wagmi + viem, `@nimiq/mini-app-sdk`, `@noble/ed2
 
 **Deployed contract (Polygon, chain 137):**
 - `NimSealEscrow` — [`0xdf4AA5f8f1789f8E1E6Cd523883bcc04761dEF93`](https://polygonscan.com/address/0xdf4AA5f8f1789f8E1E6Cd523883bcc04761dEF93)
-- Settlement token — USDT (`0xc2132D05D31c914a87C6611C10748AEb04B58e8F`, 6 decimals)
+- Settlement token — Tether USD (`0xc2132D05D31c914a87C6611C10748AEb04B58e8F`, 6 decimals; on-chain symbol now `USDT0`, Tether's omnichain USDT)
 - Deploy tx — [`0x058d…97f3`](https://polygonscan.com/tx/0x058d006d4ade3b4407c531757abd3a3618990729182c6d7fbedcfcf565bf97f3)
 
 ## Testing Instructions
 
+**Fastest (no setup):** on a phone, open **Nimiq Pay → Mini Apps → Custom URL →
+`https://nimseal.vercel.app`**. Enable wallet access, switch the Ethereum wallet to Polygon, then
+create → seal → fund an invoice with USDT.
+
+Run it locally / verify the build:
 1. `make install`
 2. `cd web && cp .env.example .env.local` (set `NEXT_PUBLIC_EVM_CHAIN_ID=11155111` for Sepolia)
-3. `npm run dev` (binds `0.0.0.0`)
-4. Nimiq Pay → Mini Apps → Custom URL → `http://<LAN-IP>:3000`
-5. `make verify` runs the full offline gate (contracts, lint, types, unit tests, build).
+3. `npm run dev` (binds `0.0.0.0`); open `http://<LAN-IP>:3000` via Nimiq Pay → Mini Apps → Custom URL
+4. `make verify` runs the full offline gate (contracts, lint, types, unit tests, build).
 
 ## Team
 

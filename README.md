@@ -123,6 +123,11 @@ Buyer → approve USDT → fund invoice → escrow holds → release / refund / 
 - The buyer releases to the seller, the seller can refund, and after `dueAt + grace` the buyer can
   reclaim an unreleased escrow. The owner can never touch escrowed funds.
 
+> **Note on the token symbol.** Tether's canonical Polygon token
+> (`0xc2132D05D31c914a87C6611C10748AEb04B58e8F`, 6 decimals) now reports the symbol **`USDT0`** — its
+> omnichain USDT standard. It is the same asset this document calls USDT; the deploy and verification
+> guards accept both symbols and keep the 6-decimal invariant strict.
+
 ## User Flow
 
 **Seller**
@@ -199,7 +204,7 @@ scripts/        env check
 make install          # installs web + contracts deps
 ```
 
-Requires Node 18+ (built on Node 24). Then configure environment
+Requires Node 20+ (built on Node 24). Then configure environment
 ([Environment Variables](#environment-variables)) and run locally.
 
 ## Running Locally
@@ -214,6 +219,12 @@ Open `http://localhost:3000` in a browser (public pages render; wallet actions n
 open the LAN URL inside Nimiq Pay to use the wallet — see below.
 
 ## Testing Inside Nimiq Pay
+
+**Simplest — use the live app (no local setup):** on your phone, open **Nimiq Pay → Mini Apps →
+Custom URL** and enter **`https://nimseal.vercel.app`**. It's served over HTTPS, so the full
+confidential path works.
+
+For local development against your own dev server:
 
 ```
 Dev computer runs `npm run dev` (binds 0.0.0.0)
