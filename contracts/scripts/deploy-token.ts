@@ -1,12 +1,12 @@
 import { writeFileSync, readFileSync, existsSync } from "fs";
 import { join } from "path";
 import { ethers } from "hardhat";
-import { addressUrl, networkInfo, txUrl } from "./botchain";
+import { addressUrl, networkInfo, txUrl } from "./networks";
 
 /**
  * Deploys the demo settlement token.
  *
- * BOT Chain testnet has no canonical USDT, so the demo needs one. This is a MockERC20 with the
+ * Sepolia has no canonical USDT, so the demo needs one. This is a MockERC20 with the
  * same shape as mainnet USDT — 6 decimals, "USDT" — so the amount math being rehearsed is the
  * amount math that will run in production.
  *
@@ -24,8 +24,8 @@ async function main() {
   const net = await networkInfo();
   if (net.isMainnet) {
     throw new Error(
-      "Refusing to deploy a mock token on mainnet. Mainnet settles in real USDT " +
-        "(0xaBabc7Ddc03e501d190C676BF3d92ef0e6e87a3C).",
+      "Refusing to deploy a mock token on Polygon. Production settles in real USDT " +
+        "(0xc2132D05D31c914a87C6611C10748AEb04B58e8F).",
     );
   }
 
@@ -73,7 +73,7 @@ async function main() {
     path,
     JSON.stringify(
       {
-        network: net.isMainnet ? "botchain" : "botchainTestnet",
+        network: net.isMainnet ? "polygon" : "sepolia",
         chainId: Number(net.chainId),
         tokenAddress,
         symbol,

@@ -1,7 +1,7 @@
 import { readFileSync } from "fs";
 import { join } from "path";
 import { ethers } from "hardhat";
-import { networkInfo, txUrl } from "./botchain";
+import { networkInfo, txUrl } from "./networks";
 
 /**
  * Points the deployed escrow at the attestor signing address.
@@ -70,7 +70,7 @@ async function discoverFromService(baseUrl: string): Promise<string> {
 async function main() {
   const net = await networkInfo();
 
-  const deploymentPath = join(__dirname, "..", "deployments", `botchain-${net.chainId}.json`);
+  const deploymentPath = join(__dirname, "..", "deployments", `${net.isMainnet ? "polygon" : "sepolia"}-${net.chainId}.json`);
   let escrowAddress: string;
   try {
     escrowAddress = JSON.parse(readFileSync(deploymentPath, "utf8")).escrowAddress;

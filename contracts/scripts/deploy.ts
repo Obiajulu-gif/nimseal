@@ -1,7 +1,7 @@
 import { writeFileSync } from "fs";
 import { join } from "path";
 import { ethers } from "hardhat";
-import { addressUrl, networkInfo, resolveSettlementToken, txUrl } from "./botchain";
+import { addressUrl, networkInfo, resolveSettlementToken, txUrl } from "./networks";
 
 const DEFAULT_REFUND_GRACE_PERIOD_SECONDS = 604_800n;
 const CONFIRMATIONS = 2;
@@ -40,12 +40,12 @@ async function main() {
   const balance = await ethers.provider.getBalance(deployer.address);
   console.log("Network             :", net.name, `(chain ${net.chainId})`);
   console.log("Deployer            :", deployer.address);
-  console.log("Deployer balance    :", ethers.formatEther(balance), net.isMainnet ? "BOT" : "tBOT");
+  console.log("Deployer balance    :", ethers.formatEther(balance), net.nativeSymbol);
   if (balance === 0n) {
     throw new Error(
       net.isMainnet
-        ? "Deployer has no BOT. There is no mainnet faucet — acquire BOT before deploying."
-        : "Deployer has no tBOT. Fund it at https://faucet.botchain.ai before deploying.",
+        ? "Deployer has no POL. Fund the deployer with POL for gas before deploying to Polygon."
+        : "Deployer has no Sepolia ETH. Fund it from a Sepolia faucet before deploying.",
     );
   }
 
@@ -90,7 +90,7 @@ async function main() {
   console.log("Post-deploy verification: all immutables match");
 
   const record = {
-    network: net.isMainnet ? "botchain" : "botchainTestnet",
+    network: net.isMainnet ? "polygon" : "sepolia",
     chainId: Number(net.chainId),
     escrowAddress,
     settlementToken: {
@@ -105,12 +105,12 @@ async function main() {
     deployedAt: new Date().toISOString(),
   };
 
-  const fileName = `botchain-${net.chainId}.json`;
+  const fileName = `${record.network}-${net.chainId}.json`;
   const outPath = join(__dirname, "..", "deployments", fileName);
   writeFileSync(outPath, `${JSON.stringify(record, null, 2)}\n`, "utf8");
   console.log(`\nWrote ${outPath}`);
   console.log(
-    "\nNext: deploy the attestor, then run `npm run configure-attestor:botchain` with " +
+    `\nNext: deploy the attestor, then run \`npm run configure-attestor:${record.network}\` with ` +
       "ATTESTOR_SIGNING_ADDRESS set to the address from the attestor's /info endpoint.",
   );
 }

@@ -1,7 +1,7 @@
 import { readFileSync, existsSync } from "fs";
 import { join } from "path";
 import { ethers } from "hardhat";
-import { networkInfo, txUrl } from "./botchain";
+import { networkInfo, txUrl } from "./networks";
 
 /**
  * Live end-to-end proof against the DEPLOYED escrow.
@@ -48,7 +48,7 @@ async function main() {
   const net = await networkInfo();
   if (net.isMainnet) throw new Error("smoke-live is testnet-only. Refusing to run on mainnet.");
 
-  const deployments = join(__dirname, "..", "deployments", `botchain-${net.chainId}.json`);
+  const deployments = join(__dirname, "..", "deployments", `${net.isMainnet ? "polygon" : "sepolia"}-${net.chainId}.json`);
   const record = JSON.parse(readFileSync(deployments, "utf8"));
   const escrowAddress: string = record.escrowAddress;
   const tokenAddress: string = record.settlementToken.address;
@@ -84,7 +84,7 @@ async function main() {
     buyerGas = await ethers.provider.getBalance(buyer.address);
     console.log("        topped up buyer gas");
   }
-  check("buyer has gas", buyerGas > 0n, `${ethers.formatEther(buyerGas)} tBOT`);
+  check("buyer has gas", buyerGas > 0n, `${ethers.formatEther(buyerGas)} ${net.nativeSymbol}`);
 
   const needed = 251_022n * 10_000n; // $2,510.22 at 6 decimals
   if ((await token.balanceOf(buyer.address)) < needed) {

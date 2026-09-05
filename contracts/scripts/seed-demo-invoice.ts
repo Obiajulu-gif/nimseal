@@ -11,7 +11,7 @@ import { keccak256, toUtf8Bytes } from "ethers";
  * simulates or stands in for an attestor-signed invoice.
  *
  * Usage:
- *   BUYER_ADDRESS=0x... npx hardhat run scripts/seed-demo-invoice.ts --network botchain
+ *   BUYER_ADDRESS=0x... npx hardhat run scripts/seed-demo-invoice.ts --network polygon
  *
  * Optional:
  *   AMOUNT_USD=2510.22    invoice total in dollars (default 2510.22)
@@ -23,9 +23,9 @@ async function main() {
   if (!signer) throw new Error("No signer. Set DEPLOYER_PRIVATE_KEY in contracts/.env.");
 
   const network = await ethers.provider.getNetwork();
-  if (network.chainId !== 677n && network.chainId !== 968n) {
+  if (network.chainId !== 137n && network.chainId !== 11155111n) {
     throw new Error(
-      `Expected BOT Chain mainnet (677) or testnet (968), got chain ${network.chainId}.`,
+      `Expected Polygon (137) or Sepolia (11155111), got chain ${network.chainId}.`,
     );
   }
 
@@ -95,9 +95,9 @@ async function main() {
   if (invoiceId === undefined) throw new Error("No InvoiceCreated event in the receipt.");
 
   const explorer =
-    network.chainId === 677n
-      ? process.env.BOTCHAIN_EXPLORER_BASE_URL ?? "https://scan.botchain.ai"
-      : process.env.BOTCHAIN_TESTNET_EXPLORER_BASE_URL ?? "https://scan.bohr.life";
+    network.chainId === 137n
+      ? process.env.POLYGON_EXPLORER_BASE_URL ?? "https://polygonscan.com"
+      : process.env.SEPOLIA_EXPLORER_BASE_URL ?? "https://sepolia.etherscan.io";
   const appUrl = process.env.APP_BASE_URL?.replace(/\/+$/, "") ?? "";
 
   console.log("");
@@ -113,7 +113,7 @@ async function main() {
 }
 
 function readDeployedEscrow(chainId: bigint): string {
-  const file = `botchain-${chainId}.json`;
+  const file = `${chainId === 137n ? "polygon" : "sepolia"}-${chainId}.json`;
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const deployment = require(`../deployments/${file}`) as { escrowAddress?: string };
   if (!deployment.escrowAddress) {

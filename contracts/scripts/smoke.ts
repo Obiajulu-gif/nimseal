@@ -1,7 +1,7 @@
 import { readFileSync } from "fs";
 import { join } from "path";
 import { ethers } from "hardhat";
-import { addressUrl, networkInfo, type NetworkInfo } from "./botchain";
+import { addressUrl, networkInfo, type NetworkInfo } from "./networks";
 
 /**
  * Read-only checks against a deployed escrow. No key, no writes, no gas.
@@ -25,7 +25,7 @@ function record(label: string, ok: boolean, detail: string) {
 }
 
 function readDeployment(net: NetworkInfo): { escrowAddress: string } {
-  const path = join(__dirname, "..", "deployments", `botchain-${net.chainId}.json`);
+  const path = join(__dirname, "..", "deployments", `${net.isMainnet ? "polygon" : "sepolia"}-${net.chainId}.json`);
   try {
     return JSON.parse(readFileSync(path, "utf8"));
   } catch {

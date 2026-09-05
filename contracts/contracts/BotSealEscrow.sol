@@ -14,7 +14,8 @@ import {EIP712} from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
 
 /**
  * @title BotSealEscrow
- * @notice Confidential invoice escrow settled in a USD stablecoin on BOT Chain.
+ * @notice Confidential invoice escrow settled in a USD stablecoin (USDT) on an EVM chain that
+ *         Nimiq Pay exposes — Polygon in production, Sepolia for testing.
  *
  * @dev Privacy model. Invoice line items, descriptions, customer identities, tax identifiers, the
  *      nonce and the salt never touch this contract. They are encrypted in the browser to the
@@ -31,9 +32,9 @@ import {EIP712} from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
  *
  * @dev Economic model. Invoices are denominated in USD cents and settled in a USD stablecoin, so
  *      there is no price feed, no staleness window and no slippage: the amount due is a pure
- *      decimal conversion, fixed the moment the invoice is created. This is deliberate. BOT Chain
- *      has no on-chain oracle, and inventing one to price a USD invoice in a USD asset would add
- *      trust and failure modes to buy nothing.
+ *      decimal conversion, fixed the moment the invoice is created. This is deliberate — pricing a
+ *      USD invoice in a USD asset through an oracle would add trust and failure modes to buy
+ *      nothing.
  */
 contract BotSealEscrow is Ownable2Step, Pausable, ReentrancyGuard, EIP712 {
     using SafeERC20 for IERC20;

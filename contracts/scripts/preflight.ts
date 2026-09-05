@@ -1,5 +1,5 @@
 import { ethers } from "hardhat";
-import { networkInfo, resolveSettlementToken } from "./botchain";
+import { networkInfo, resolveSettlementToken } from "./networks";
 
 /**
  * Pre-deployment check. Answers "will the next command work?" without spending anything.
@@ -37,7 +37,7 @@ async function main() {
   mask("address", true, deployer.address);
 
   const balance = await ethers.provider.getBalance(deployer.address);
-  const symbol = net.isMainnet ? "BOT" : "tBOT";
+  const symbol = net.nativeSymbol;
   const funded = balance > 0n;
   allOk =
     mask(
@@ -46,8 +46,8 @@ async function main() {
       funded
         ? `${ethers.formatEther(balance)} ${symbol}`
         : net.isMainnet
-          ? `0 BOT — there is no mainnet faucet; send BOT to this exact address`
-          : `0 tBOT — fund it at https://faucet.botchain.ai`,
+          ? `0 POL — fund this exact address with POL for gas before deploying`
+          : `0 ETH — fund this address from a Sepolia faucet`,
     ) && allOk;
 
   // A deploy plus the token deploy plus configure-attestor is comfortably under 0.05.
