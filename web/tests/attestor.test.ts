@@ -82,7 +82,7 @@ describe("EIP-712 type definition", () => {
    */
   it("hashes to the same digest the contract computes", () => {
     const digest = hashTypedData({
-      domain: domainFor(677, "0x5FbDB2315678afecb367f032d93F642f64180aa3"),
+      domain: domainFor(137, "0x5FbDB2315678afecb367f032d93F642f64180aa3"),
       types: CONFIDENTIAL_INVOICE_TYPES,
       primaryType: "ConfidentialInvoice",
       message: {
@@ -94,15 +94,15 @@ describe("EIP-712 type definition", () => {
         attestationId: keccak256(toHex("attestation")),
       },
     });
-    expect(digest).toBe("0x841721222ea07e5f0b0ebef004696c512eb386c1c4542106520f0cbe2d6e7d7a");
+    expect(digest).toBe("0xc7ffc46a457557df783a2e2d7ffb913b9adcec21e9e8b1569ff86c9baea5cf69");
   });
 
   it("binds the domain to a chain and a verifying contract", () => {
-    const domain = domainFor(677, ESCROW);
+    const domain = domainFor(137, ESCROW);
     expect(domain).toEqual({
       name: "BotSeal",
       version: "1",
-      chainId: 677,
+      chainId: 137,
       verifyingContract: ESCROW,
     });
   });

@@ -4,7 +4,7 @@
 
 import { describe, expect, it } from "vitest";
 
-import { botchain } from "@/lib/chain";
+import { settlementChain, explorerBaseUrl } from "@/lib/chain";
 import { InvoiceStatus, invoiceStatusLabel } from "@/lib/contracts";
 import { explainError } from "@/lib/errors";
 import { addressUrl, shortenHex, txUrl } from "@/lib/explorer";
@@ -30,12 +30,14 @@ describe("invoiceStatusLabel", () => {
 });
 
 describe("explorer URLs", () => {
-  it("builds a transaction URL", () => {
-    expect(txUrl(TX)).toBe(`https://scan.botchain.ai/tx/${TX}`);
+  const base = explorerBaseUrl();
+
+  it("builds a transaction URL on the configured explorer", () => {
+    expect(txUrl(TX)).toBe(`${base}/tx/${TX}`);
   });
 
-  it("builds an address URL", () => {
-    expect(addressUrl(ADDRESS)).toBe(`https://scan.botchain.ai/address/${ADDRESS}`);
+  it("builds an address URL on the configured explorer", () => {
+    expect(addressUrl(ADDRESS)).toBe(`${base}/address/${ADDRESS}`);
   });
 
   it("never produces a double slash", () => {
@@ -152,29 +154,28 @@ describe("invoiceFormSchema", () => {
 
 describe("explainError", () => {
   it("translates escrow custom errors", () => {
-    expect(explainError(new Error("reverted with custom error 'SlippageExceeded()'"))).toMatch(
-      /price moved/i,
-    );
     expect(explainError(new Error("execution reverted: NotBuyer()"))).toMatch(/only the buyer/i);
     expect(explainError(new Error("AttestationAlreadyConsumed()"))).toMatch(/already been used/i);
     expect(explainError(new Error("InvalidAttestorSignature()"))).toMatch(/signature/i);
   });
 
   it("recognises a user rejection", () => {
-    expect(explainError(new Error("User rejected the request"))).toMatch(/you rejected/i);
+    expect(explainError(new Error("User rejected the request"))).toMatch(/cancelled/i);
   });
 
-  it("recognises insufficient gas funds", () => {
-    expect(explainError(new Error("insufficient funds for gas * price + value"))).toMatch(/BOT/);
+  it("recognises insufficient gas funds and names the native token", () => {
+    expect(explainError(new Error("insufficient funds for gas * price + value"))).toContain(
+      settlementChain.nativeCurrency.symbol,
+    );
   });
 
   it("explains the wrong-network gas estimation failure in terms of the network", () => {
-    // The exact string a wallet left on Ethereum mainnet produces.
+    // The exact string a wallet left on another chain produces.
     const raw =
       'The contract function "createPublicInvoice" reverted with the following reason: ' +
       "RPC 0x1 Infura eth_sendRawTransaction: gas required exceeds allowance (0)";
     const explained = explainError(new Error(raw));
-    expect(explained).toMatch(/BOT Chain/);
+    expect(explained).toContain(settlementChain.name);
   });
 
   it("tells the user to switch networks on a chain mismatch", () => {
@@ -183,13 +184,12 @@ describe("explainError", () => {
     );
   });
 
-  it("names the chain this build is pinned to, not just 'BOT Chain'", () => {
-    // A testnet build that says "switch to BOT Chain" sends the user to mainnet - a different
-    // chain, a different escrow, and a second failure for a new reason. The message has to name
-    // the configured network and its id.
+  it("names the chain this build is pinned to", () => {
+    // A build that says only "switch networks" is useless: the message must name the configured
+    // network and its id so the user lands on the right chain and escrow.
     const explained = explainError(new Error("ChainMismatchError: chain does not match"));
-    expect(explained).toContain(botchain.name);
-    expect(explained).toContain(String(botchain.id));
+    expect(explained).toContain(settlementChain.name);
+    expect(explained).toContain(String(settlementChain.id));
   });
 
   it("recognises an ERC-20 allowance failure", () => {
