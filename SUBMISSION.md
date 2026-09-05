@@ -91,8 +91,13 @@ Next.js 15, React 19, Tailwind, wagmi + viem, `@nimiq/mini-app-sdk`, `@noble/ed2
 
 ## Live App
 
-`LIVE_APP_URL_TO_BE_PROVIDED` (deploy `web/` to Vercel over HTTPS; see
-[docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)).
+**https://nimseal-git-nimiq-main-obiajulugifs-projects.vercel.app** — the `nimiq-main` branch on
+Vercel (auto-deploys on every push).
+
+> To promote this to the apex production URL, set the Vercel project's **Production Branch** to
+> `nimiq-main` (Settings → Git) and add the env vars in [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md). Until
+> the escrow address + `ATTESTOR_PRIVATE_KEY` are configured, the live site renders every page but
+> shows "escrow not configured" for create/fund actions.
 
 ## Testing Instructions
 
