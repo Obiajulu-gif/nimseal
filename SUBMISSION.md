@@ -91,13 +91,12 @@ Next.js 15, React 19, Tailwind, wagmi + viem, `@nimiq/mini-app-sdk`, `@noble/ed2
 
 ## Live App
 
-**https://nimseal-git-nimiq-main-obiajulugifs-projects.vercel.app** — the `nimiq-main` branch on
-Vercel (auto-deploys on every push).
+**https://nimseal.vercel.app** (auto-deploys from `nimiq-main`).
 
-> To promote this to the apex production URL, set the Vercel project's **Production Branch** to
-> `nimiq-main` (Settings → Git) and add the env vars in [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md). Until
-> the escrow address + `ATTESTOR_PRIVATE_KEY` are configured, the live site renders every page but
-> shows "escrow not configured" for create/fund actions.
+**Deployed contract (Polygon, chain 137):**
+- `NimSealEscrow` — [`0xdf4AA5f8f1789f8E1E6Cd523883bcc04761dEF93`](https://polygonscan.com/address/0xdf4AA5f8f1789f8E1E6Cd523883bcc04761dEF93)
+- Settlement token — USDT (`0xc2132D05D31c914a87C6611C10748AEb04B58e8F`, 6 decimals)
+- Deploy tx — [`0x058d…97f3`](https://polygonscan.com/tx/0x058d006d4ade3b4407c531757abd3a3618990729182c6d7fbedcfcf565bf97f3)
 
 ## Testing Instructions
 
@@ -171,7 +170,8 @@ protected USDT settlement, in the wallet users already carry.
 [x] Team information prepared
 [ ] Nimiq payout wallet supplied by project owner
 [x] Demo script prepared
-[ ] Production Polygon deployment + live HTTPS URL (owner action)
+[x] Production Polygon deployment (escrow 0xdf4AA5…dEF93) + live HTTPS URL
+[ ] Attestor address set on escrow + ATTESTOR_PRIVATE_KEY in Vercel (owner action)
 ```
 
 ---

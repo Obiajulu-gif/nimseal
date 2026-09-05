@@ -7,9 +7,9 @@ create an invoice whose commercial terms stay private, seal it with your Nimiq w
 can verify it came from you, and get paid in USDT held in protected escrow — without exposing your
 line items, prices, or client relationships on a public ledger.
 
-> **Status.** Built for the **Nimiq Mini Apps Competition — Cycle II**. The app runs today against a
-> Sepolia test deployment; Polygon production settlement is a single deploy away (see
-> [Deployment](#deployment)). MIT-licensed.
+> **Status.** Built for the **Nimiq Mini Apps Competition — Cycle II**. Live on **Polygon**: escrow
+> [`0xdf4AA5f8f1789f8E1E6Cd523883bcc04761dEF93`](https://polygonscan.com/address/0xdf4AA5f8f1789f8E1E6Cd523883bcc04761dEF93),
+> settling in USDT. App: **https://nimseal.vercel.app**. MIT-licensed.
 
 ---
 

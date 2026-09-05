@@ -1,0 +1,15 @@
+{
+  "network": "polygon",
+  "chainId": 137,
+  "escrowAddress": "0xdf4AA5f8f1789f8E1E6Cd523883bcc04761dEF93",
+  "settlementToken": {
+    "address": "0xc2132D05D31c914a87C6611C10748AEb04B58e8F",
+    "symbol": "USDT0",
+    "decimals": 6
+  },
+  "deploymentTx": "0x058d006d4ade3b4407c531757abd3a3618990729182c6d7fbedcfcf565bf97f3",
+  "deployer": "0x453cb03ff71d40fB7Fa73Ea537A1F63E164A0f80",
+  "owner": "0x453cb03ff71d40fB7Fa73Ea537A1F63E164A0f80",
+  "refundGracePeriodSeconds": 604800,
+  "deployedAt": "2026-09-05T17:10:07.663Z"
+}
