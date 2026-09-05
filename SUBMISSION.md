@@ -113,11 +113,8 @@ Solo build by the project owner (GitHub `Obiajulu-gif`).
 ## Nimiq Prize Wallet
 
 ```
-NIMIQ_PRIZE_WALLET_TO_BE_PROVIDED
+NQ81 11SE MH8S EYTD N8CG 2RY6 HY03 E4RD FXF3
 ```
-
-*(Placeholder — the project owner must supply the real Nimiq payout address. Do not treat this as a
-valid address.)*
 
 ## Known Limitations
 
@@ -168,7 +165,7 @@ protected USDT settlement, in the wallet users already carry.
 [x] Local testing path inside Nimiq Pay documented
 [x] Competition description <= 250 words
 [x] Team information prepared
-[ ] Nimiq payout wallet supplied by project owner
+[x] Nimiq payout wallet supplied by project owner (NQ81 11SE MH8S EYTD N8CG 2RY6 HY03 E4RD FXF3)
 [x] Demo script prepared
 [x] Production Polygon deployment (escrow 0xdf4AA5…dEF93) + live HTTPS URL
 [x] Attestor address set on escrow (0x56f2adEA…0645765a) + ATTESTOR_PRIVATE_KEY in Vercel; /api/attestor/info reports chain 137
