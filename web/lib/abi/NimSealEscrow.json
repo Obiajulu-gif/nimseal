@@ -704,12 +704,12 @@
             "type": "bool"
           },
           {
-            "internalType": "enum BotSealEscrow.InvoiceStatus",
+            "internalType": "enum NimSealEscrow.InvoiceStatus",
             "name": "status",
             "type": "uint8"
           }
         ],
-        "internalType": "struct BotSealEscrow.Invoice",
+        "internalType": "struct NimSealEscrow.Invoice",
         "name": "",
         "type": "tuple"
       }
@@ -771,7 +771,7 @@
             "type": "bytes32"
           }
         ],
-        "internalType": "struct BotSealEscrow.ConfidentialInvoice",
+        "internalType": "struct NimSealEscrow.ConfidentialInvoice",
         "name": "attestation",
         "type": "tuple"
       }
@@ -968,7 +968,7 @@
             "type": "bytes32"
           }
         ],
-        "internalType": "struct BotSealEscrow.ConfidentialInvoice",
+        "internalType": "struct NimSealEscrow.ConfidentialInvoice",
         "name": "attestation",
         "type": "tuple"
       },

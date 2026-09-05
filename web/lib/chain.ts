@@ -1,7 +1,7 @@
 /**
  * EVM settlement-chain definition and the shared public client.
  *
- * BotSeal settles in USDT through the EVM provider that Nimiq Pay injects at `window.ethereum`
+ * nimSeal settles in USDT through the EVM provider that Nimiq Pay injects at `window.ethereum`
  * (EIP-1193, discoverable via EIP-6963). Those chains are standard public networks, so their
  * definitions come from viem rather than being hand-declared:
  *
@@ -20,7 +20,7 @@ import { env } from "./env";
 export const POLYGON_CHAIN_ID = 137;
 export const SEPOLIA_CHAIN_ID = 11155111;
 
-/** The EVM chains Nimiq Pay exposes that BotSeal supports for settlement. */
+/** The EVM chains Nimiq Pay exposes that nimSeal supports for settlement. */
 const SUPPORTED_CHAINS: Record<number, Chain> = {
   [POLYGON_CHAIN_ID]: polygon,
   [SEPOLIA_CHAIN_ID]: sepolia,

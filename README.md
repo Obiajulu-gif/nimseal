@@ -1,8 +1,8 @@
-# BotSeal
+# nimSeal
 
 **Confidential invoices and protected payments inside Nimiq Pay.**
 
-BotSeal is a Nimiq Pay Mini App for freelancers, agencies, contractors and small businesses. You
+nimSeal is a Nimiq Pay Mini App for freelancers, agencies, contractors and small businesses. You
 create an invoice whose commercial terms stay private, seal it with your Nimiq wallet so the buyer
 can verify it came from you, and get paid in USDT held in protected escrow — without exposing your
 line items, prices, or client relationships on a public ledger.
@@ -13,29 +13,29 @@ line items, prices, or client relationships on a public ledger.
 
 ---
 
-## What BotSeal Does
+## What nimSeal Does
 
 A B2B invoice contains things neither party wants public: line items, unit prices, customer
 identities, tax treatment, the discount you gave this client and not that one. Putting that on a
-public chain just to get escrow is a bad trade. BotSeal doesn't make you take it.
+public chain just to get escrow is a bad trade. nimSeal doesn't make you take it.
 
 - **Sellers** compose an invoice inside Nimiq Pay, seal it with their Nimiq wallet, and share a
   payment link.
 - **Buyers** open the link, verify the Nimiq seal, and fund the exact amount in USDT through
   protected escrow.
-- The escrow contract enforces release, refund and expiry — the money is never in BotSeal's hands.
+- The escrow contract enforces release, refund and expiry — the money is never in nimSeal's hands.
 
-## Why BotSeal
+## Why nimSeal
 
 Existing crypto payment flows either expose too much (everything on-chain) or provide no structured
-protection (a bare wallet-to-wallet transfer). BotSeal keeps the commercial detail private, proves
+protection (a bare wallet-to-wallet transfer). nimSeal keeps the commercial detail private, proves
 the total off-chain, settles in a USD stablecoin, and adds a wallet-backed proof of origin that a
 buyer can check in one glance. It runs where the wallet already is: inside Nimiq Pay, on a phone,
 with no extension, no seed phrase, and no separate signup.
 
 ## Nimiq Mini Apps Competition — Cycle II
 
-BotSeal is a Nimiq Pay Mini App. It uses **both** providers Nimiq Pay injects:
+nimSeal is a Nimiq Pay Mini App. It uses **both** providers Nimiq Pay injects:
 
 - the **Nimiq provider** (`@nimiq/mini-app-sdk`) for the wallet-backed invoice seal, and
 - the **Ethereum provider** (`window.ethereum`, EIP-1193) for USDT escrow settlement.
@@ -65,7 +65,7 @@ See [How It Uses Nimiq Pay](#how-it-uses-nimiq-pay) and [SUBMISSION.md](SUBMISSI
           └───────────┬──────────┘
                       ▼
               ┌───────────────┐
-              │    BotSeal    │
+              │    nimSeal    │
               │ Confidential  │
               │   Invoice     │
               └───────┬───────┘
@@ -90,7 +90,7 @@ When a seller creates a confidential invoice, they sign a canonical statement bi
 their Nimiq identity, through Nimiq Pay:
 
 ```
-BotSeal Invoice Seal v1
+nimSeal Invoice Seal v1
 chain:137
 escrow:0x…
 invoice:14
@@ -112,7 +112,7 @@ rides in the payment link, so verification needs no backend. Implementation:
 
 ## USDT Protected Escrow
 
-Settlement is USDT (6 decimals) held by [`BotSealEscrow`](contracts/contracts/BotSealEscrow.sol):
+Settlement is USDT (6 decimals) held by [`NimSealEscrow`](contracts/contracts/NimSealEscrow.sol):
 
 ```
 Buyer → approve USDT → fund invoice → escrow holds → release / refund / expiry
@@ -128,7 +128,7 @@ Buyer → approve USDT → fund invoice → escrow holds → release / refund / 
 **Seller**
 
 ```
-Open BotSeal in Nimiq Pay → Create invoice → enter buyer, amount, due date, line items
+Open nimSeal in Nimiq Pay → Create invoice → enter buyer, amount, due date, line items
 → terms encrypted + committed → attestor validates → seal with Nimiq wallet
 → share payment link
 ```
@@ -150,7 +150,7 @@ Open payment link → verify Nimiq seal → connect via Nimiq Pay
   [`web/lib/contracts.ts`](web/lib/contracts.ts), settlement hooks.
 - **Attestor** — a server-side Next.js route ([`web/app/api/attestor`](web/app/api/attestor)) that
   decrypts a private invoice, recomputes every total, and signs only the settlement facts (EIP-712).
-- **Contract** — `BotSealEscrow`, an OpenZeppelin-based escrow with a confidential relay path.
+- **Contract** — `NimSealEscrow`, an OpenZeppelin-based escrow with a confidential relay path.
 
 ## Privacy Model
 
@@ -164,7 +164,7 @@ browser encrypts (ECIES) → server decrypts → server recomputes totals
 - **Public, on-chain**: seller, buyer, USD total, due date, and a 32-byte `termsCommitment` binding
   the private terms.
 - **The attestor is a server key, not a TEE.** An operator with server access can read invoice
-  plaintext while it is being validated. BotSeal does **not** claim zero-knowledge, trustless, or
+  plaintext while it is being validated. nimSeal does **not** claim zero-knowledge, trustless, or
   TEE-secured privacy. What it guarantees: plaintext never reaches the chain, the commitment binds
   the terms, the total was validated before it was signed, and a signed result cannot be replayed.
   See [docs/SECURITY.md](docs/SECURITY.md).
@@ -188,7 +188,7 @@ web/            Next.js Mini App
   lib/          EVM chain/wagmi/contracts, attestor wire + validation
   hooks/        wallet, invoices, settlement, Nimiq
   app/          home, dashboard, invoices, pay, attestor API
-contracts/      BotSealEscrow + Hardhat (Polygon / Sepolia)
+contracts/      NimSealEscrow + Hardhat (Polygon / Sepolia)
 docs/           architecture, security, deployment, confidential flow, demo
 scripts/        env check
 ```
@@ -228,7 +228,7 @@ Phone → Nimiq Pay → Mini Apps → Custom URL → http://<LAN-IP>:3000
    switch affects Nimiq operations only; EVM stays on mainnet chains, so add Sepolia via the wallet
    for EVM testing.
 
-> Loading over an HTTP LAN URL is not a secure context. BotSeal avoids secure-context-only APIs
+> Loading over an HTTP LAN URL is not a secure context. nimSeal avoids secure-context-only APIs
 > where it can and falls back gracefully (clipboard, storage). The ECIES step used by the
 > confidential path relies on Web Crypto and is best exercised over HTTPS — see
 > [Known Limitations](#known-limitations).
@@ -241,7 +241,7 @@ Phone → Nimiq Pay → Mini Apps → Custom URL → http://<LAN-IP>:3000
 |----------|---------|
 | `NEXT_PUBLIC_EVM_CHAIN_ID` | `137` (Polygon) or `11155111` (Sepolia) |
 | `NEXT_PUBLIC_RPC_URL` / `NEXT_PUBLIC_EXPLORER_URL` | optional overrides |
-| `NEXT_PUBLIC_ESCROW_ADDRESS` | deployed `BotSealEscrow` |
+| `NEXT_PUBLIC_ESCROW_ADDRESS` | deployed `NimSealEscrow` |
 | `NEXT_PUBLIC_SETTLEMENT_TOKEN_ADDRESS` | USDT (Polygon) / mock (Sepolia) |
 | `NEXT_PUBLIC_ENABLE_PUBLIC_MODE` | expose the unverified public-invoice fallback |
 | `ATTESTOR_PRIVATE_KEY` | **server-only** attestor signing key (never `NEXT_PUBLIC_`) |

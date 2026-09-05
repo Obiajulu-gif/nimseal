@@ -76,7 +76,7 @@ describe("EIP-712 type definition", () => {
 
   /**
    * Golden digest, generated independently with ethers' TypedDataEncoder (see
-   * contracts/test/BotSealEscrow.test.ts, which pins the same encoding against the deployed
+   * contracts/test/NimSealEscrow.test.ts, which pins the same encoding against the deployed
    * contract's own `hashConfidentialInvoice`). If viem and the contract ever disagree about how
    * this struct hashes, every signature the attestor mints becomes unrelayable — so pin it.
    */
@@ -94,13 +94,13 @@ describe("EIP-712 type definition", () => {
         attestationId: keccak256(toHex("attestation")),
       },
     });
-    expect(digest).toBe("0xc7ffc46a457557df783a2e2d7ffb913b9adcec21e9e8b1569ff86c9baea5cf69");
+    expect(digest).toBe("0x32a67dda54cacfff7e2a4a86e1819ca682a73c16328162bf69d66621e2ca377c");
   });
 
   it("binds the domain to a chain and a verifying contract", () => {
     const domain = domainFor(137, ESCROW);
     expect(domain).toEqual({
-      name: "BotSeal",
+      name: "nimSeal",
       version: "1",
       chainId: 137,
       verifyingContract: ESCROW,
@@ -259,7 +259,7 @@ describe("termsCommitment", () => {
   });
 
   it("is domain-separated", () => {
-    expect(COMMITMENT_DOMAIN).toBe("BOTSEAL_INVOICE_V1");
+    expect(COMMITMENT_DOMAIN).toBe("NIMSEAL_INVOICE_V1");
   });
 });
 

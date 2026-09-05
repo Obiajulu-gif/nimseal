@@ -1,9 +1,9 @@
 {
-  "name": "botseal-contracts",
+  "name": "nimseal-contracts",
   "version": "1.0.0",
   "private": true,
   "license": "MIT",
-  "description": "BotSeal confidential invoice + USDT escrow contracts for Nimiq Pay (Polygon / Sepolia)",
+  "description": "nimSeal confidential invoice + USDT escrow contracts for Nimiq Pay (Polygon / Sepolia)",
   "scripts": {
     "compile": "hardhat compile",
     "test": "hardhat test",

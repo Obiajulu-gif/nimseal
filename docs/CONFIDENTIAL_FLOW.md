@@ -92,7 +92,7 @@ A ciphertext that will not decrypt returns **400** with a single uniform message
 
 ```
 termsCommitment = keccak256(abi.encode(
-    keccak256("BOTSEAL_INVOICE_V1"),
+    keccak256("NIMSEAL_INVOICE_V1"),
     seller, buyer, escrowContract,
     keccak256(invoiceReference),
     itemsHash,                      // keccak over the concatenated per-item hashes, in order
@@ -126,7 +126,7 @@ second relay into `AttestationAlreadyConsumed` rather than a duplicate invoice.
 EIP-712 typed data:
 
 ```
-domain = { name: "BotSeal", version: "1", chainId, verifyingContract: <escrow> }
+domain = { name: "nimSeal", version: "1", chainId, verifyingContract: <escrow> }
 
 ConfidentialInvoice(
   address seller,

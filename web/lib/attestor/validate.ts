@@ -36,7 +36,7 @@ import {
 } from "@/lib/invoice";
 
 /** Domain tag mixed into every terms commitment. Changing it invalidates old commitments. */
-export const COMMITMENT_DOMAIN = "BOTSEAL_INVOICE_V1";
+export const COMMITMENT_DOMAIN = "NIMSEAL_INVOICE_V1";
 
 export interface ValidatedInvoice {
   seller: Hex;

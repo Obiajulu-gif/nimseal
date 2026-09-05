@@ -16,11 +16,11 @@ import type { Hex } from "viem";
 
 // --- EIP-712 -----------------------------------------------------------------
 
-export const EIP712_DOMAIN_NAME = "BotSeal";
+export const EIP712_DOMAIN_NAME = "nimSeal";
 export const EIP712_DOMAIN_VERSION = "1";
 
 /**
- * Must match `CONFIDENTIAL_INVOICE_TYPEHASH` in BotSealEscrow.sol exactly, field for field and in
+ * Must match `CONFIDENTIAL_INVOICE_TYPEHASH` in NimSealEscrow.sol exactly, field for field and in
  * order. `hashConfidentialInvoice()` on the contract exists so this can be asserted rather than
  * assumed; `tests/attestor.test.ts` does exactly that.
  */

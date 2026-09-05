@@ -1,5 +1,5 @@
 /**
- * BotSeal's own brand mark — a wax-seal shield over a private ledger. Deliberately not the Nimiq
+ * nimSeal's own brand mark — a wax-seal shield over a private ledger. Deliberately not the Nimiq
  * logo; Nimiq brand assets are only used where the Nimiq Design Kit permits.
  */
 

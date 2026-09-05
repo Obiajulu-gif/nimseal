@@ -57,7 +57,7 @@ async function main() {
   );
   console.log("Refund grace (s)    :", refundGracePeriod.toString());
 
-  const factory = await ethers.getContractFactory("BotSealEscrow", deployer);
+  const factory = await ethers.getContractFactory("NimSealEscrow", deployer);
   const escrow = await factory.deploy(owner, token.address, refundGracePeriod);
 
   const deploymentTx = escrow.deploymentTransaction();

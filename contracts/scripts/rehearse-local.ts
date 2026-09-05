@@ -64,7 +64,7 @@ async function main() {
   await token.waitForDeployment();
   const tokenAddress = await token.getAddress();
 
-  const EscrowFactory = await ethers.getContractFactory("BotSealEscrow", deployer);
+  const EscrowFactory = await ethers.getContractFactory("NimSealEscrow", deployer);
   const escrow = await EscrowFactory.deploy(deployer.address, tokenAddress, REFUND_GRACE_PERIOD);
   await escrow.waitForDeployment();
   const escrowAddress = await escrow.getAddress();
@@ -154,7 +154,7 @@ async function main() {
       ),
     };
     signature = await attestorWallet.signTypedData(
-      { name: "BotSeal", version: "1", chainId, verifyingContract: escrowAddress },
+      { name: "nimSeal", version: "1", chainId, verifyingContract: escrowAddress },
       EIP712_TYPES,
       attestation,
     );

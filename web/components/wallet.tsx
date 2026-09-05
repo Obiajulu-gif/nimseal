@@ -187,7 +187,7 @@ export function RequireWallet({ children }: { children: React.ReactNode }) {
     return (
       <Alert tone="info" title="Wallet access needed">
         <p className="mb-3">
-          Give BotSeal permission to use your Nimiq Pay wallet on {settlementChain.name} to continue.
+          Give nimSeal permission to use your Nimiq Pay wallet on {settlementChain.name} to continue.
         </p>
         <ConnectButton full />
       </Alert>
@@ -219,9 +219,9 @@ export function SiteHeader() {
   return (
     <header className="sticky top-0 z-50 border-b border-white/[0.06] bg-background/80 backdrop-blur-2xl">
       <div className="mx-auto flex h-16 max-w-5xl items-center justify-between gap-3 px-4 sm:px-6">
-        <Link href="/" aria-label="BotSeal home" className="flex items-center gap-2.5">
+        <Link href="/" aria-label="nimSeal home" className="flex items-center gap-2.5">
           <BrandMark className="h-8 w-8" />
-          <span className="font-display text-base font-semibold tracking-[-0.02em]">BotSeal</span>
+          <span className="font-display text-base font-semibold tracking-[-0.02em]">nimSeal</span>
         </Link>
         <div className="flex items-center gap-2 sm:gap-3">
           <WalletBalances />

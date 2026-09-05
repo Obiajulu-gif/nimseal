@@ -7,7 +7,7 @@
 
 import { settlementChain } from "./chain";
 
-/** Custom error name -> user-facing explanation. Keys match `BotSealEscrow`'s error selectors. */
+/** Custom error name -> user-facing explanation. Keys match `NimSealEscrow`'s error selectors. */
 const ESCROW_ERRORS: Record<string, string> = {
   ZeroAddress: "That address cannot be zero.",
   NotAContract: "That address does not contain a contract.",

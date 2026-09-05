@@ -84,7 +84,7 @@ const message = {
 
 const recovered = await recoverTypedDataAddress({
   domain: {
-    name: "BotSeal",
+    name: "nimSeal",
     version: "1",
     chainId: info.chainId,
     verifyingContract: info.escrowContract,

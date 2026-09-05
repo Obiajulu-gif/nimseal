@@ -2,7 +2,7 @@
 /**
  * Copies the ABI the frontend consumes out of the Hardhat artifact tree.
  *
- *   contracts/artifacts/ -> BotSealEscrow   (npm run compile)
+ *   contracts/artifacts/ -> NimSealEscrow   (npm run compile)
  *
  * Only the `abi` array is written. Bytecode and build metadata stay in the artifact trees so the
  * frontend bundle never carries deployment material.
@@ -19,9 +19,9 @@ const outDir = join(root, "web", "lib", "abi");
 
 const SOURCES = [
   {
-    name: "BotSealEscrow",
-    artifact: join(root, "contracts/artifacts/contracts/BotSealEscrow.sol/BotSealEscrow.json"),
-    out: "BotSealEscrow.json",
+    name: "NimSealEscrow",
+    artifact: join(root, "contracts/artifacts/contracts/NimSealEscrow.sol/NimSealEscrow.json"),
+    out: "NimSealEscrow.json",
     build: "cd contracts && npm run compile",
   },
 ];

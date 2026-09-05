@@ -3,15 +3,15 @@
         sync-abi web-dev web-build web-test web-lint web-typecheck verify clean
 
 help:
-	@echo "BotSeal — confidential invoices for Nimiq Pay"
+	@echo "nimSeal — confidential invoices for Nimiq Pay"
 	@echo ""
 	@echo "  make install                      Install contract and web dependencies"
 	@echo "  make check-env                    Report which environment variables are set"
 	@echo ""
 	@echo "  make contracts-test               Run the Hardhat test suite"
 	@echo "  make contracts-coverage           Solidity coverage report"
-	@echo "  make contracts-deploy-testnet     Deploy BotSealEscrow to Sepolia (11155111)"
-	@echo "  make contracts-deploy             Deploy BotSealEscrow to Polygon (137)"
+	@echo "  make contracts-deploy-testnet     Deploy NimSealEscrow to Sepolia (11155111)"
+	@echo "  make contracts-deploy             Deploy NimSealEscrow to Polygon (137)"
 	@echo "  make contracts-configure-attestor Set the attestor signing address on the escrow"
 	@echo "  make contracts-smoke              Read-only checks against the deployed escrow"
 	@echo ""

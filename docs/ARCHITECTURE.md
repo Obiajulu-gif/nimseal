@@ -6,7 +6,7 @@
 |---|---|---|
 | Browser app (`web/`) | User's device | Generating entropy, encrypting, holding plaintext transiently |
 | Attestor (`web/app/api/attestor/`) | The app's own server runtime | Decrypting, validating, computing totals, signing |
-| `BotSealEscrow` (`contracts/`) | Polygon / Sepolia | Signature verification, replay protection, custody |
+| `NimSealEscrow` (`contracts/`) | Polygon / Sepolia | Signature verification, replay protection, custody |
 | USDT | Polygon / Sepolia | Settlement asset |
 
 Four boxes, and one of them used to be a Docker Compose stack with a Go toolchain, a Redis instance
@@ -109,7 +109,7 @@ extraction and two states from the frontend's state machine.
 Everything is integer arithmetic. There is no floating point in the browser, the attestor or the
 contract.
 
-**Cents to token units**, in `BotSealEscrow._usdCentsToTokens`:
+**Cents to token units**, in `NimSealEscrow._usdCentsToTokens`:
 
 ```
 amount = ceil(usdAmountCents × 10^dec / 100)

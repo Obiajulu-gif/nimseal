@@ -50,7 +50,7 @@ const info = await infoRes.json();
 
 const homeRes = await fetch(SITE);
 const homeHtml = await homeRes.text();
-check("home page serves", homeRes.ok && homeHtml.includes("BotSeal"), `HTTP ${homeRes.status}`);
+check("home page serves", homeRes.ok && homeHtml.includes("nimSeal"), `HTTP ${homeRes.status}`);
 check("home page is not an auth wall", !homeHtml.includes("Vercel Authentication") && !homeHtml.includes("_vercel/sso"));
 check("no Flare branding in served HTML", !/flare|coston|ftso|fxrp/i.test(homeHtml));
 

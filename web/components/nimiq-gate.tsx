@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * A calm, dismissible banner shown when BotSeal is opened in a normal browser instead of inside
+ * A calm, dismissible banner shown when nimSeal is opened in a normal browser instead of inside
  * Nimiq Pay. The web build still renders every public page (invoice records, payment summaries) —
  * only wallet actions need the host — so this explains rather than blocks.
  */
@@ -24,7 +24,7 @@ export function NimiqGate() {
     check();
     const t = setTimeout(check, 1500);
     try {
-      setDismissed(sessionStorage.getItem("botseal.gate.dismissed") === "1");
+      setDismissed(sessionStorage.getItem("nimseal.gate.dismissed") === "1");
     } catch {
       /* sessionStorage may be unavailable; default to showing the banner */
     }
@@ -38,7 +38,7 @@ export function NimiqGate() {
       <div className="mx-auto flex max-w-5xl items-start gap-3 px-4 py-2.5 sm:px-6">
         <Wallet className="mt-0.5 h-4 w-4 shrink-0 text-accent" aria-hidden="true" />
         <p className="flex-1 text-xs leading-5 text-foreground/80">
-          You&apos;re viewing BotSeal in a browser. Open it inside{" "}
+          You&apos;re viewing nimSeal in a browser. Open it inside{" "}
           <span className="font-semibold text-foreground">Nimiq Pay → Mini Apps</span> to create,
           seal, and pay invoices with your wallet.
         </p>
@@ -49,7 +49,7 @@ export function NimiqGate() {
           onClick={() => {
             setDismissed(true);
             try {
-              sessionStorage.setItem("botseal.gate.dismissed", "1");
+              sessionStorage.setItem("nimseal.gate.dismissed", "1");
             } catch {
               /* ignore */
             }

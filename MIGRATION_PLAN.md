@@ -1,18 +1,18 @@
 # Migration notes — BOT Chain → Nimiq Pay
 
-BotSeal began as a confidential-invoice escrow that ran on BOT Chain (and, before that, on Flare).
+nimSeal began as a confidential-invoice escrow that ran on BOT Chain (and, before that, on Flare).
 For the Nimiq Mini Apps Competition (Cycle II) it was substantially rebuilt around the Nimiq Pay
 provider architecture. This file records what changed and why, so the history is legible without
 implying BOT Chain is still involved. **Nothing in the shipped app depends on BOT Chain.**
 
 ## What was kept
 
-The parts that made BotSeal distinctive were portable and stayed:
+The parts that made nimSeal distinctive were portable and stayed:
 
 - The **confidential invoice** model: browser-side encryption, an off-chain attestor that decrypts,
   recomputes every total, and signs only the settlement facts (EIP-712), and a 32-byte terms
   commitment binding the private terms.
-- The **`BotSealEscrow`** contract and its full state machine (create, fund, release, refund, expiry,
+- The **`NimSealEscrow`** contract and its full state machine (create, fund, release, refund, expiry,
   cancel), replay protection, attestor-signature verification, pausing, and its 66 tests. It is a
   standard EVM contract, so it moved networks without a rewrite — only comments changed.
 - Integer-cent money arithmetic and the deterministic commitment/attestation-id derivation.

@@ -3,7 +3,7 @@ import { ethers } from "hardhat";
 import { loadFixture, time } from "@nomicfoundation/hardhat-network-helpers";
 import type { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
 import type { Wallet } from "ethers";
-import type { BotSealEscrow, MockERC20 } from "../typechain-types";
+import type { NimSealEscrow, MockERC20 } from "../typechain-types";
 
 const ZERO_ADDRESS = ethers.ZeroAddress;
 const ZERO_BYTES32 = ethers.ZeroHash;
@@ -46,7 +46,7 @@ type Attestation = {
 };
 
 function domainFor(chainId: bigint, verifyingContract: string) {
-  return { name: "BotSeal", version: "1", chainId, verifyingContract };
+  return { name: "nimSeal", version: "1", chainId, verifyingContract };
 }
 
 async function signAttestation(
@@ -58,7 +58,7 @@ async function signAttestation(
   return signer.signTypedData(domainFor(chainId, verifyingContract), EIP712_TYPES, attestation);
 }
 
-describe("BotSealEscrow", () => {
+describe("NimSealEscrow", () => {
   async function deployFixture() {
     const [owner, seller, buyer, stranger] = await ethers.getSigners();
 
@@ -78,12 +78,12 @@ describe("BotSealEscrow", () => {
     )) as unknown as MockERC20;
     await token.waitForDeployment();
 
-    const EscrowFactory = await ethers.getContractFactory("BotSealEscrow");
+    const EscrowFactory = await ethers.getContractFactory("NimSealEscrow");
     const escrow = (await EscrowFactory.deploy(
       owner.address,
       await token.getAddress(),
       REFUND_GRACE_PERIOD,
-    )) as unknown as BotSealEscrow;
+    )) as unknown as NimSealEscrow;
     await escrow.waitForDeployment();
 
     // Buyer starts with 1,000,000 USDT so balance is never the limiting factor by accident.
@@ -173,7 +173,7 @@ describe("BotSealEscrow", () => {
 
     it("rejects a zero owner", async () => {
       const { token } = await loadFixture(deployFixture);
-      const factory = await ethers.getContractFactory("BotSealEscrow");
+      const factory = await ethers.getContractFactory("NimSealEscrow");
 
       await expect(
         factory.deploy(ZERO_ADDRESS, await token.getAddress(), REFUND_GRACE_PERIOD),
@@ -182,7 +182,7 @@ describe("BotSealEscrow", () => {
 
     it("rejects a zero settlement token", async () => {
       const { owner } = await loadFixture(deployFixture);
-      const factory = await ethers.getContractFactory("BotSealEscrow");
+      const factory = await ethers.getContractFactory("NimSealEscrow");
 
       await expect(
         factory.deploy(owner.address, ZERO_ADDRESS, REFUND_GRACE_PERIOD),
@@ -191,7 +191,7 @@ describe("BotSealEscrow", () => {
 
     it("rejects an externally owned account where a contract is required", async () => {
       const { owner, stranger } = await loadFixture(deployFixture);
-      const factory = await ethers.getContractFactory("BotSealEscrow");
+      const factory = await ethers.getContractFactory("NimSealEscrow");
 
       await expect(
         factory.deploy(owner.address, stranger.address, REFUND_GRACE_PERIOD),
@@ -205,7 +205,7 @@ describe("BotSealEscrow", () => {
       const oddToken = await MockERC20Factory.deploy("Odd", "ODD", 19);
       await oddToken.waitForDeployment();
 
-      const factory = await ethers.getContractFactory("BotSealEscrow");
+      const factory = await ethers.getContractFactory("NimSealEscrow");
       await expect(
         factory.deploy(owner.address, await oddToken.getAddress(), REFUND_GRACE_PERIOD),
       ).to.be.revertedWithCustomError(factory, "UnsupportedTokenDecimals");
@@ -215,7 +215,7 @@ describe("BotSealEscrow", () => {
       const { escrow, escrowAddress, chainId } = await loadFixture(deployFixture);
 
       const domain = await escrow.eip712Domain();
-      expect(domain.name).to.equal("BotSeal");
+      expect(domain.name).to.equal("nimSeal");
       expect(domain.version).to.equal("1");
       expect(domain.chainId).to.equal(chainId);
       expect(domain.verifyingContract).to.equal(escrowAddress);

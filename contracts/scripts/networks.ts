@@ -3,7 +3,7 @@ import { ethers } from "hardhat";
 /**
  * Supported EVM network constants and settlement-token resolution.
  *
- * BotSeal settles in USDT on an EVM chain that Nimiq Pay exposes: Polygon in production, Sepolia
+ * nimSeal settles in USDT on an EVM chain that Nimiq Pay exposes: Polygon in production, Sepolia
  * for testing. There is no contract registry to discover, so the settlement token is a known
  * address that we verify rather than resolve dynamically.
  */

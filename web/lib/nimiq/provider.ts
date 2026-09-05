@@ -45,7 +45,7 @@ export async function getNimiqProvider(timeout = 4_000): Promise<NimiqProvider> 
     return await sdkInit({ timeout });
   } catch {
     throw new NimiqUnavailableError(
-      "Open BotSeal inside Nimiq Pay to use your Nimiq wallet.",
+      "Open nimSeal inside Nimiq Pay to use your Nimiq wallet.",
     );
   }
 }

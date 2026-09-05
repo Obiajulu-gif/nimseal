@@ -13,7 +13,7 @@ import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import {EIP712} from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
 
 /**
- * @title BotSealEscrow
+ * @title NimSealEscrow
  * @notice Confidential invoice escrow settled in a USD stablecoin (USDT) on an EVM chain that
  *         Nimiq Pay exposes — Polygon in production, Sepolia for testing.
  *
@@ -36,7 +36,7 @@ import {EIP712} from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
  *      USD invoice in a USD asset through an oracle would add trust and failure modes to buy
  *      nothing.
  */
-contract BotSealEscrow is Ownable2Step, Pausable, ReentrancyGuard, EIP712 {
+contract NimSealEscrow is Ownable2Step, Pausable, ReentrancyGuard, EIP712 {
     using SafeERC20 for IERC20;
 
     // ---------------------------------------------------------------------
@@ -182,7 +182,7 @@ contract BotSealEscrow is Ownable2Step, Pausable, ReentrancyGuard, EIP712 {
         address initialOwner,
         address settlementToken,
         uint256 refundGracePeriodSeconds
-    ) Ownable(initialOwner) EIP712("BotSeal", "1") {
+    ) Ownable(initialOwner) EIP712("nimSeal", "1") {
         if (settlementToken == address(0)) revert ZeroAddress();
         if (settlementToken.code.length == 0) revert NotAContract();
 

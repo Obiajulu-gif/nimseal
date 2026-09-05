@@ -28,7 +28,7 @@ export function sealSubjectFromInvoice(invoice: Invoice): SealSubject | undefine
 }
 
 function key(invoiceId: bigint): string {
-  return `botseal.seal.${env.chainId}.${(env.escrowAddress ?? "").toLowerCase()}.${invoiceId}`;
+  return `nimseal.seal.${env.chainId}.${(env.escrowAddress ?? "").toLowerCase()}.${invoiceId}`;
 }
 
 export function loadSeal(invoiceId: bigint): EncodedSeal | undefined {

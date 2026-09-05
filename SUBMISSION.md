@@ -1,6 +1,6 @@
-# BotSeal — Nimiq Mini Apps Competition (Cycle II)
+# nimSeal — Nimiq Mini Apps Competition (Cycle II)
 
-**Project Name:** BotSeal
+**Project Name:** nimSeal
 **Tagline:** Confidential invoices and protected payments, inside Nimiq Pay.
 **Category:** Payments / Business tools (Nimiq Pay Mini App)
 
@@ -15,7 +15,7 @@ that carries no structure, no protection, and no proof of who issued it.
 
 ## Solution
 
-BotSeal lets a seller create an invoice whose commercial terms stay encrypted off-chain, seal it
+nimSeal lets a seller create an invoice whose commercial terms stay encrypted off-chain, seal it
 with their Nimiq wallet so the buyer can verify its origin, and receive USDT held in protected
 escrow. Only the minimum settlement facts — parties, USD total, due date, and a 32-byte commitment —
 ever reach the chain.
@@ -30,9 +30,9 @@ in USD and want privacy plus payment protection without a bank or a public ledge
 It replaces "send me crypto to this address" with a real invoice: private terms, a verifiable seal,
 a fixed USD amount, and escrow rules a contract enforces — all in the wallet the user already has.
 
-## How BotSeal Uses Nimiq Pay
+## How nimSeal Uses Nimiq Pay
 
-BotSeal runs inside the Nimiq Pay WebView and uses both injected providers:
+nimSeal runs inside the Nimiq Pay WebView and uses both injected providers:
 
 - **Nimiq provider** (`@nimiq/mini-app-sdk` `init()`): `listAccounts()` for identity and `sign()` for
   the invoice seal.
@@ -42,7 +42,7 @@ BotSeal runs inside the Nimiq Pay WebView and uses both injected providers:
 
 No MetaMask, no WalletConnect, no seed phrase, no signup — Nimiq Pay is the wallet host.
 
-## How BotSeal Uses Nimiq
+## How nimSeal Uses Nimiq
 
 The **Nimiq Invoice Seal** is a real trust primitive, not a connection indicator. The seller signs a
 canonical statement binding the invoice's public facts (chain, escrow, invoice id, commitment,
@@ -60,20 +60,20 @@ settled in a USD asset. Production USDT is Polygon `0xc2132D05D31c914a87C6611C10
 ## What Makes It Original
 
 A wallet-backed, self-verifying seal on a *confidential* invoice. Most Mini Apps use the wallet to
-move money; BotSeal also uses it to prove authorship of a document whose contents stay private — and
+move money; nimSeal also uses it to prove authorship of a document whose contents stay private — and
 the proof travels in the payment link with no backend.
 
 ## Privacy Model
 
 Browser encrypts (ECIES) → attestor decrypts → recomputes every total → signs only the settlement
 facts (EIP-712) → chain stores the minimum. Line items, identities, tax detail and the
-commitment's entropy never reach the chain. **The attestor is a server key, not a TEE** — BotSeal
+commitment's entropy never reach the chain. **The attestor is a server key, not a TEE** — nimSeal
 does not claim zero-knowledge or trustless privacy. See [docs/SECURITY.md](docs/SECURITY.md).
 
 ## Architecture
 
 See [README.md](README.md#how-it-uses-nimiq-pay) for the full diagram. Next.js 15 Mini App · Nimiq +
-Ethereum providers · off-chain attestor (Next.js route) · `BotSealEscrow` on Polygon/Sepolia.
+Ethereum providers · off-chain attestor (Next.js route) · `NimSealEscrow` on Polygon/Sepolia.
 
 ## Main User Flow
 
@@ -130,11 +130,11 @@ valid address.)*
 
 ## Competition Description (≤250 words)
 
-BotSeal is a Nimiq Pay Mini App for confidential invoicing and protected settlement. It's built for
+nimSeal is a Nimiq Pay Mini App for confidential invoicing and protected settlement. It's built for
 freelancers, agencies, contractors and small businesses who invoice in USD and don't want their line
 items, prices and client relationships written to a public ledger just to get payment protection.
 
-A seller opens BotSeal inside Nimiq Pay and composes an invoice. The commercial detail is encrypted
+A seller opens nimSeal inside Nimiq Pay and composes an invoice. The commercial detail is encrypted
 in the browser; an off-chain attestor decrypts it, recomputes every total, and signs only the
 settlement facts. The seller then seals the invoice with their Nimiq wallet — signing a canonical
 statement that binds the invoice to their Nimiq identity. That seal is the heart of the integration:
@@ -147,7 +147,7 @@ escrow contract that enforces release, refund and expiry. Only parties, USD tota
 32-byte commitment ever touch the chain.
 
 The whole flow is mobile-first and needs no extension, seed phrase or signup — Nimiq Pay is the
-wallet. BotSeal is honest about its trust model: the attestor is a server key, not a TEE, and never
+wallet. nimSeal is honest about its trust model: the attestor is a server key, not a TEE, and never
 claims zero-knowledge. What it delivers is private invoicing, wallet-backed proof of origin, and
 protected USDT settlement, in the wallet users already carry.
 
@@ -183,7 +183,7 @@ protected USDT settlement, in the wallet users already carry.
   "Business invoices carry private terms. Most crypto payment flows expose everything,
    or give you no protection at all."
 
-0:10–0:25  Open BotSeal inside Nimiq Pay
+0:10–0:25  Open nimSeal inside Nimiq Pay
   Home screen: "Private invoices. Protected payments." Tap Create invoice.
 
 0:25–0:50  Seller creates a confidential invoice

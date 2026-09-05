@@ -7,7 +7,7 @@
 
 import type { Abi, Hex } from "viem";
 
-import escrowAbiJson from "./abi/BotSealEscrow.json";
+import escrowAbiJson from "./abi/NimSealEscrow.json";
 import { env } from "./env";
 
 export const escrowAbi = escrowAbiJson as Abi;
@@ -80,7 +80,7 @@ export function settlementTokenAddress(): Hex {
 
 // --- Invoice status ----------------------------------------------------------
 
-/** Mirrors `BotSealEscrow.InvoiceStatus`. Order is significant. */
+/** Mirrors `NimSealEscrow.InvoiceStatus`. Order is significant. */
 export enum InvoiceStatus {
   None = 0,
   Pending = 1,

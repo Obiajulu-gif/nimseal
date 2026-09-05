@@ -100,7 +100,7 @@ async function main() {
   }
   const sender = signers[0];
 
-  const escrow = await ethers.getContractAt("BotSealEscrow", escrowAddress, sender);
+  const escrow = await ethers.getContractAt("NimSealEscrow", escrowAddress, sender);
 
   const owner = await escrow.owner();
   if (owner.toLowerCase() !== sender.address.toLowerCase()) {

@@ -69,7 +69,7 @@ async function main() {
   console.log("buyer  :", buyer.address);
   console.log();
 
-  const escrow = await ethers.getContractAt("BotSealEscrow", escrowAddress, seller);
+  const escrow = await ethers.getContractAt("NimSealEscrow", escrowAddress, seller);
   const token = await ethers.getContractAt("MockERC20", tokenAddress, seller);
 
   console.log("Preconditions");
@@ -112,7 +112,7 @@ async function main() {
   };
 
   const signature = await attestor.signTypedData(
-    { name: "BotSeal", version: "1", chainId: net.chainId, verifyingContract: escrowAddress },
+    { name: "nimSeal", version: "1", chainId: net.chainId, verifyingContract: escrowAddress },
     EIP712_TYPES,
     attestation,
   );

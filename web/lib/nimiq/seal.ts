@@ -26,7 +26,7 @@ if (!ed25519.etc.sha512Sync) {
 
 // --- Canonical seal message --------------------------------------------------
 
-export const SEAL_DOMAIN = "BotSeal Invoice Seal";
+export const SEAL_DOMAIN = "nimSeal Invoice Seal";
 export const SEAL_VERSION = 1;
 
 export interface SealSubject {

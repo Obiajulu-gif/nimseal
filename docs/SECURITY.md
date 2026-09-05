@@ -1,6 +1,6 @@
 # Security
 
-An honest account of what BotSeal protects, what it does not, and what would have to be true before
+An honest account of what nimSeal protects, what it does not, and what would have to be true before
 it could hold real money.
 
 ---
@@ -210,7 +210,7 @@ theft vector, and is another reason to put the owner behind a multisig.
 
 ## Remaining work before this could hold real value
 
-1. **Third-party audit** of `BotSealEscrow.sol` and the attestor route.
+1. **Third-party audit** of `NimSealEscrow.sol` and the attestor route.
 2. **Attested execution** for the validator, with reproducible builds and a published code hash —
    the only thing that would turn the confidentiality claim from policy into a guarantee.
 3. **Owner hardening** — multisig or timelock, with monitoring on `AttestorAddressUpdated` and

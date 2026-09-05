@@ -94,7 +94,7 @@ export default function HomePage() {
       <section className="space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="font-display text-xl font-semibold tracking-[-0.03em] sm:text-2xl">
-            How BotSeal works
+            How nimSeal works
           </h2>
           {confidential.isLoading ? (
             <Badge variant="neutral">Checking</Badge>
@@ -135,7 +135,7 @@ export default function HomePage() {
           </CardContent>
           <p className="mt-4 text-xs leading-5 text-foreground/50">
             An off-chain attestor decrypts the invoice, recomputes every total, and signs only the
-            settlement facts. It is a server key, not a TEE — BotSeal never claims zero-knowledge.
+            settlement facts. It is a server key, not a TEE — nimSeal never claims zero-knowledge.
           </p>
         </Card>
       </section>

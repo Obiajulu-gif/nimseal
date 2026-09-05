@@ -21,8 +21,8 @@ const displayFont = Space_Grotesk({
 
 export const metadata: Metadata = {
   title: {
-    default: "BotSeal — confidential invoices for Nimiq Pay",
-    template: "%s — BotSeal",
+    default: "nimSeal — confidential invoices for Nimiq Pay",
+    template: "%s — nimSeal",
   },
   description:
     "Create confidential invoices, seal them with your Nimiq wallet, and settle in USDT through Nimiq Pay.",
@@ -49,7 +49,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <footer className="mx-auto max-w-5xl px-4 pb-24 pt-6 text-xs text-muted-foreground sm:px-6 sm:pb-10">
             <div className="section-rule mb-5 h-px" />
             <div className="flex flex-col justify-between gap-2 sm:flex-row sm:items-center">
-              <p>BotSeal · Private terms. Protected settlement.</p>
+              <p>nimSeal · Private terms. Protected settlement.</p>
               <p className="opacity-60">Nimiq Pay Mini App · Experimental · Unaudited</p>
             </div>
           </footer>

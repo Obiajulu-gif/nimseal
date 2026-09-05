@@ -51,7 +51,7 @@ async function main() {
     return;
   }
 
-  const escrow = await ethers.getContractAt("BotSealEscrow", escrowAddress);
+  const escrow = await ethers.getContractAt("NimSealEscrow", escrowAddress);
 
   const [tokenAddress, tokenScale, grace, attestor, nextId, escrowed, owner] = await Promise.all([
     escrow.SETTLEMENT_TOKEN(),

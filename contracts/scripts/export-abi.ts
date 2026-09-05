@@ -7,7 +7,7 @@ import { artifacts } from "hardhat";
  * build metadata stay in `contracts/artifacts/`.
  */
 const EXPORTS: Array<{ contract: string; file: string; optional?: boolean }> = [
-  { contract: "BotSealEscrow", file: "BotSealEscrow.json" },
+  { contract: "NimSealEscrow", file: "NimSealEscrow.json" },
 ];
 
 async function main() {

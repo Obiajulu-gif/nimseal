@@ -60,12 +60,12 @@ ${innerOf(lockup).replace(/currentColor/g, color)}
 }
 
 const jobs = [
-  ["botseal-logo-1024.png", squareMark(null), 1024, 1024],
-  ["botseal-logo-512.png", squareMark(null), 512, 512],
-  ["botseal-logo-dark-1024.png", squareMark("#0B0B12"), 1024, 1024],
-  ["botseal-logo-white-1024.png", squareMark("#FFFFFF"), 1024, 1024],
-  ["botseal-wordmark-dark-text.png", wordmark("#0F172A", null), 1408, 528],
-  ["botseal-wordmark-light-text.png", wordmark("#FFFFFF", null), 1408, 528],
+  ["nimseal-logo-1024.png", squareMark(null), 1024, 1024],
+  ["nimseal-logo-512.png", squareMark(null), 512, 512],
+  ["nimseal-logo-dark-1024.png", squareMark("#0B0B12"), 1024, 1024],
+  ["nimseal-logo-white-1024.png", squareMark("#FFFFFF"), 1024, 1024],
+  ["nimseal-wordmark-dark-text.png", wordmark("#0F172A", null), 1408, 528],
+  ["nimseal-wordmark-light-text.png", wordmark("#FFFFFF", null), 1408, 528],
 ];
 
 for (const [name, svg, w, h] of jobs) {

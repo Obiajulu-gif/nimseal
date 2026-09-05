@@ -89,7 +89,7 @@ export function SellerSealCard({ invoice }: { invoice: Invoice }) {
             <div className="flex flex-wrap gap-2">
               <ShareButton
                 url={link}
-                title={`BotSeal invoice #${invoice.id}`}
+                title={`nimSeal invoice #${invoice.id}`}
                 text="Pay this confidential invoice with Nimiq Pay"
                 className="inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-br from-primary to-[#ff4d2e] px-4 text-sm font-semibold text-primary-foreground"
               >
