@@ -19,6 +19,7 @@ import {
   domainFor,
   type ConfidentialAttestation,
 } from "@/lib/attestor";
+import { env } from "@/lib/env";
 
 let cached: PrivateKeyAccount | undefined;
 
@@ -51,13 +52,13 @@ export function configuredEscrow(): Hex {
   return raw as Hex;
 }
 
+/**
+ * The chain the attestor binds its EIP-712 domain to. This MUST equal the escrow's chain, or every
+ * signature is rejected on-chain. It comes from the same validated source as the rest of the app
+ * (NEXT_PUBLIC_EVM_CHAIN_ID, restricted to Polygon/Sepolia) — never a hardcoded fallback.
+ */
 export function configuredChainId(): number {
-  const raw = process.env.NEXT_PUBLIC_CHAIN_ID?.trim();
-  const parsed = raw ? Number(raw) : 677;
-  if (!Number.isInteger(parsed) || parsed <= 0) {
-    throw new Error(`NEXT_PUBLIC_CHAIN_ID is not a valid chain id: "${raw}"`);
-  }
-  return parsed;
+  return env.chainId;
 }
 
 /**
