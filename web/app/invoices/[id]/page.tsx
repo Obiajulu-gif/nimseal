@@ -7,6 +7,7 @@
 
 import Link from "next/link";
 import { use } from "react";
+import { useSearchParams } from "next/navigation";
 import { useAccount } from "wagmi";
 
 import {
@@ -18,6 +19,7 @@ import {
   StatusBadge,
 } from "@/components/common";
 import { ConnectButton } from "@/components/wallet";
+import { NimiqSealBadge, SellerSealCard } from "@/components/nimiq-seal";
 import {
   Alert,
   Button,
@@ -83,6 +85,8 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
 function InvoiceDetail({ invoiceId }: { invoiceId: bigint }) {
   const { data, isLoading, isError } = useInvoice(invoiceId);
   const { symbol, decimals } = useSettlementTokenMetadata();
+  const { address } = useAccount();
+  const sealParam = useSearchParams()?.get("seal") ?? undefined;
 
   if (isLoading) {
     return (
@@ -162,6 +166,10 @@ function InvoiceDetail({ invoiceId }: { invoiceId: bigint }) {
       </Card>
 
       <aside className="space-y-6">
+        <NimiqSealBadge invoice={invoice} sealParam={sealParam} />
+        {invoice.confidential && address && address.toLowerCase() === invoice.seller.toLowerCase() ? (
+          <SellerSealCard invoice={invoice} />
+        ) : null}
         <ActionsPanel invoice={invoice} />
         <PartyBalances invoice={invoice} />
         <Card>

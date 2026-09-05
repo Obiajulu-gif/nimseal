@@ -10,9 +10,11 @@
 
 import Link from "next/link";
 import { use } from "react";
+import { useSearchParams } from "next/navigation";
 import { useAccount } from "wagmi";
 
 import { AddressLink, PageHeader, StatusBadge } from "@/components/common";
+import { NimiqSealBadge } from "@/components/nimiq-seal";
 import { RequireWallet } from "@/components/wallet";
 import {
   Alert,
@@ -82,6 +84,7 @@ export default function PayPage({ params }: { params: Promise<{ id: string }> })
 
 function PayFlow({ invoiceId }: { invoiceId: bigint }) {
   const { address } = useAccount();
+  const sealParam = useSearchParams()?.get("seal") ?? undefined;
   const { data, isLoading } = useInvoice(invoiceId);
   const invoice = data as unknown as Invoice | undefined;
 
@@ -245,6 +248,7 @@ function PayFlow({ invoiceId }: { invoiceId: bigint }) {
       </Card>
 
       <aside className="space-y-6">
+        <NimiqSealBadge invoice={invoice} sealParam={sealParam} />
         <Card>
           <CardHeader>
             <CardTitle>Invoice</CardTitle>
