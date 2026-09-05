@@ -27,9 +27,14 @@ coverage.json
 *.pem
 *.key
 
-# Local-only deployment output. botchain-<chainId>.json IS committed: public metadata only.
+# Local-only deployment output. <network>-<chainId>.json IS committed: public metadata only.
 contracts/deployments/local*.json
 contracts/deployments/*.local.json
+
+# Installed AI skills. The Nimiq mini-apps skill is vendored by `npx skills add` (regenerable);
+# skills-lock.json pins it and .claude/launch.json is kept. The symlinked copy is not portable.
+.agents/
+.claude/skills/
 
 # Playwright
 **/test-results/
