@@ -6,10 +6,109 @@
  */
 
 import Link from "next/link";
+import { Check, Copy, Share2 } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
 
 import { InvoiceStatus, invoiceStatusLabel } from "@/lib/contracts";
 import { addressUrl, shortenHex, txUrl } from "@/lib/explorer";
 import { Badge, type BadgeProps } from "@/components/ui/primitives";
+
+/**
+ * Copies text to the clipboard with a WebView-safe fallback.
+ *
+ * The async Clipboard API is unavailable in insecure contexts (an HTTP LAN URL during Nimiq Pay
+ * testing) and can be absent in some WebViews, so a hidden-textarea + `execCommand` path backs it
+ * up. Never throws; reports failure through the returned boolean.
+ */
+export async function copyText(value: string): Promise<boolean> {
+  try {
+    if (typeof navigator !== "undefined" && navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(value);
+      return true;
+    }
+  } catch {
+    // fall through to the legacy path
+  }
+  try {
+    const el = document.createElement("textarea");
+    el.value = value;
+    el.setAttribute("readonly", "");
+    el.style.position = "fixed";
+    el.style.opacity = "0";
+    document.body.appendChild(el);
+    el.select();
+    const ok = document.execCommand("copy");
+    document.body.removeChild(el);
+    return ok;
+  } catch {
+    return false;
+  }
+}
+
+/** A compact icon button that copies `value` and briefly confirms. */
+export function CopyButton({ value, label = "value" }: { value: string; label?: string }) {
+  const [copied, setCopied] = useState(false);
+  return (
+    <button
+      type="button"
+      aria-label={`Copy ${label}`}
+      onClick={async () => {
+        const ok = await copyText(value);
+        if (ok) {
+          setCopied(true);
+          setTimeout(() => setCopied(false), 1500);
+        } else {
+          toast.error("Could not copy. Select and copy manually.");
+        }
+      }}
+      className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-white/10 bg-white/[0.04] text-foreground/60 transition-colors hover:border-primary/30 hover:text-foreground"
+    >
+      {copied ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
+    </button>
+  );
+}
+
+/**
+ * Shares a link via the Web Share API where available, copying it otherwise. Progressive
+ * enhancement: the button always works, and the native share sheet is a bonus on mobile.
+ */
+export function ShareButton({
+  url,
+  title,
+  text,
+  className,
+  children,
+}: {
+  url: string;
+  title?: string;
+  text?: string;
+  className?: string;
+  children?: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      className={className}
+      onClick={async () => {
+        const shareData = { title, text, url };
+        try {
+          if (typeof navigator !== "undefined" && navigator.share) {
+            await navigator.share(shareData);
+            return;
+          }
+        } catch {
+          return; // user dismissed the share sheet; nothing to do
+        }
+        const ok = await copyText(url);
+        toast[ok ? "success" : "error"](ok ? "Payment link copied." : "Could not copy the link.");
+      }}
+    >
+      <Share2 className="h-4 w-4" aria-hidden="true" />
+      {children ?? "Share"}
+    </button>
+  );
+}
 
 export function AddressLink({ address, full = false }: { address: string; full?: boolean }) {
   return (

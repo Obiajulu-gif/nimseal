@@ -1,8 +1,10 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter, Space_Grotesk } from "next/font/google";
 
 import { Providers } from "./providers";
 import { SiteHeader, WrongNetworkBanner } from "@/components/wallet";
+import { NimiqGate } from "@/components/nimiq-gate";
+import { BottomNav } from "@/components/nav";
 import "./globals.css";
 
 const bodyFont = Inter({
@@ -19,11 +21,18 @@ const displayFont = Space_Grotesk({
 
 export const metadata: Metadata = {
   title: {
-    default: "BotSeal — private invoices, provable settlement",
+    default: "BotSeal — confidential invoices for Nimiq Pay",
     template: "%s — BotSeal",
   },
   description:
-    "Seal confidential invoices off-chain and settle them in USDT on BOT Chain, with minimal on-chain disclosure.",
+    "Create confidential invoices, seal them with your Nimiq wallet, and settle in USDT through Nimiq Pay.",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  themeColor: "#0b0e15",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -31,18 +40,20 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" className={`${bodyFont.variable} ${displayFont.variable}`}>
       <body className="overflow-x-hidden">
         <Providers>
+          <NimiqGate />
           <WrongNetworkBanner />
           <SiteHeader />
-          <main className="mx-auto min-h-[calc(100vh-10rem)] max-w-7xl px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
+          <main className="mx-auto min-h-[calc(100vh-9rem)] max-w-5xl px-4 pb-28 pt-6 sm:px-6 sm:pb-16 sm:pt-10">
             {children}
           </main>
-          <footer className="mx-auto max-w-7xl px-4 pb-10 pt-8 text-xs text-muted-foreground sm:px-6 lg:px-8">
-            <div className="section-rule mb-6 h-px" />
+          <footer className="mx-auto max-w-5xl px-4 pb-24 pt-6 text-xs text-muted-foreground sm:px-6 sm:pb-10">
+            <div className="section-rule mb-5 h-px" />
             <div className="flex flex-col justify-between gap-2 sm:flex-row sm:items-center">
-              <p>BotSeal · Private terms. Provable settlement.</p>
-              <p className="opacity-60">BOT Chain · Experimental software · Unaudited</p>
+              <p>BotSeal · Private terms. Protected settlement.</p>
+              <p className="opacity-60">Nimiq Pay Mini App · Experimental · Unaudited</p>
             </div>
           </footer>
+          <BottomNav />
         </Providers>
       </body>
     </html>

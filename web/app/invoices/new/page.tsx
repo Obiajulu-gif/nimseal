@@ -435,15 +435,15 @@ function InvoiceForm() {
           <Alert tone="warning" title="Confidential mode unavailable">
             {!isEscrowConfigured ? (
               <p>
-                <code className="font-mono text-xs">NEXT_PUBLIC_INSTRUCTION_SENDER_ADDRESS</code> is
-                not set, so the private flow is disabled.
+                <code className="font-mono text-xs">NEXT_PUBLIC_ESCROW_ADDRESS</code> is not set, so
+                the private flow is disabled.
               </p>
             ) : (
               <p>
                 The escrow has no attestor signing address configured yet, so{" "}
                 <code className="font-mono text-xs">relayConfidentialInvoice</code> would revert with{" "}
-                <code className="font-mono text-xs">TeeNotConfigured</code>. The button is disabled
-                rather than letting you pay for an instruction that cannot be relayed.
+                <code className="font-mono text-xs">AttestorNotConfigured</code>. The button is
+                disabled rather than letting you pay for a relay that cannot succeed.
               </p>
             )}
             <p className="mt-2">
@@ -590,18 +590,16 @@ function ProgressPanel({
 
 function errorTitle(kind: string): string {
   switch (kind) {
-    case "extension-unavailable":
-      return "Confidential extension unavailable";
-    case "wallet-rejected":
-      return "Request rejected";
-    case "instruction-failed":
-      return "Instruction failed";
-    case "result-timeout":
+    case "attestor-unavailable":
       return "Could not reach the attestor";
+    case "wallet-rejected":
+      return "Request cancelled";
     case "attestor-rejected":
       return "The attestor rejected this invoice";
     case "relay-reverted":
       return "Relay reverted";
+    case "wrong-network":
+      return "Wrong network";
     default:
       return "Something went wrong";
   }

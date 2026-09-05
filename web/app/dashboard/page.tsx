@@ -74,7 +74,7 @@ function InvoiceList() {
   if (seller.isError || buyer.isError || isError) {
     const detail = seller.error ?? buyer.error ?? error;
     return (
-      <Alert tone="danger" title="Could not reach the BOT Chain RPC">
+      <Alert tone="danger" title="Could not reach the network RPC">
         {detail instanceof Error ? detail.message : "The invoice list could not be loaded."}
       </Alert>
     );
